@@ -35,17 +35,31 @@ public enum AgentTool: String, CaseIterable, Identifiable, Sendable {
     /// count. Claude Code tells hooks it needs approval through a notification, sent once a prompt
     /// has waited a few seconds; Codex has an event for it. Claude's "waiting for your input" after
     /// every idle minute isn't asking for anything, so it's left out.
+    ///
+    /// NotchDeck adds three of Claude Code's long-standing events: a session starting (ready),
+    /// compacting its context, and its to-do list changing, which is the one measure of progress
+    /// Claude Code gives hooks. Only events Claude Code has had for a long time: one it doesn't know
+    /// can make it reject the whole settings file.
     var events: [(event: String, matcher: String?, state: String)] {
         let waiting: (String, String?, String) =
             switch self {
             case .claude: ("Notification", "permission_prompt|elicitation_dialog", "waiting")
             case .codex: ("PermissionRequest", nil, "waiting")
             }
-        return [
+        let common: [(event: String, matcher: String?, state: String)] = [
             ("UserPromptSubmit", nil, "working"), waiting, ("PostToolUse", nil, "resumed"), ("Stop", nil, "done"),
             ("SessionEnd", nil, "ended"),
         ]
+        guard self == .claude else { return common }
+        return common + [
+            ("SessionStart", nil, "idle"), ("PreCompact", nil, "compacting"),
+            ("PostToolUse", Self.todoTools, "todos"),
+        ]
     }
+
+    /// Claude Code's to-do tools: the older TodoWrite, which sends the whole list each time, and the
+    /// newer task tools, which add and update one task at a time.
+    static let todoTools = "TodoWrite|TaskCreate|TaskUpdate"
 }
 
 /// What went wrong changing a tool's settings. Nothing is written when any of these happen.
@@ -96,10 +110,20 @@ public struct AgentHooks: Sendable {
 
     /// Whether the tool's settings have the notch's hooks.
     func isInstalled(_ tool: AgentTool) -> Bool {
-        guard let data = try? Data(contentsOf: configFile(tool)),
-            let settings = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
-        else { return false }
+        guard let settings = settings(tool) else { return false }
         return Self.hasOurs(settings)
+    }
+
+    /// Whether the installed hooks are exactly the ones this version adds, so an update that hooks
+    /// more events can add them to a tool that's already connected.
+    func isCurrent(_ tool: AgentTool) -> Bool {
+        guard let settings = settings(tool) else { return false }
+        return Self.ours(in: settings) == Self.ours(in: Self.adding(tool, command: command, to: [:]))
+    }
+
+    private func settings(_ tool: AgentTool) -> [String: Any]? {
+        guard let data = try? Data(contentsOf: configFile(tool)) else { return nil }
+        return try? JSONSerialization.jsonObject(with: data) as? [String: Any]
     }
 
     public func install(_ tool: AgentTool) throws {
@@ -163,6 +187,21 @@ public struct AgentHooks: Sendable {
         if let permissions { try? fileManager.setAttributes([.posixPermissions: permissions], ofItemAtPath: file.path) }
     }
 
+    /// The notch's handlers in `settings`, as "event matcher command" lines, to compare.
+    static func ours(in settings: [String: Any]) -> Set<String> {
+        let events = settings["hooks"] as? [String: Any] ?? [:]
+        var found: Set<String> = []
+        for (event, groups) in events {
+            for case let group as [String: Any] in groups as? [Any] ?? [] {
+                for handler in group["hooks"] as? [Any] ?? [] where isOurs(handler) {
+                    let command = (handler as? [String: Any])?["command"] as? String ?? ""
+                    found.insert("\(event) \(group["matcher"] as? String ?? "*") \(command)")
+                }
+            }
+        }
+        return found
+    }
+
     static func isOurs(_ handler: Any) -> Bool {
         ((handler as? [String: Any])?["command"] as? String)?.contains(scriptName) == true
     }
@@ -221,35 +260,110 @@ public struct AgentHooks: Sendable {
     // MARK: The hook script
 
     /// Runs on the agent's hook events. It writes one small file per session beside itself: the
-    /// state, the project folder, the app the agent runs in, its process, and what it's waiting
-    /// for. Never the prompt or any code, and nothing leaves the Mac. `plutil` reads the hook's
-    /// JSON, since macOS 14 has no `jq`. It never blocks the agent and always exits 0.
+    /// state, the project folder, the app the agent runs in, its process, what it's waiting for, and
+    /// (NotchDeck) how far through its to-do list it is, the step it's on, and when it started
+    /// working. Never the prompt or any code, and nothing leaves the Mac. `plutil` reads the hook's
+    /// JSON, since macOS has no `jq`. It never blocks the agent and always exits 0.
+    ///
+    /// The session file, one field per line: state, folder, bundle ID, TERM_PROGRAM, pid, message,
+    /// tool, to-dos done, to-dos in all, current step, and when it started working (Unix time).
     static let scriptSource = #"""
         #!/bin/sh
         # NotchDeck agent status, run by Claude Code's and Codex's hooks. NotchDeck adds the hooks
         # when you connect a tool in Settings > Agents and removes them when you disconnect.
-        # Usage: notchdeck-agent-hook <claude|codex> <working|waiting|resumed|done|ended> < hook.json
+        # Usage: notchdeck-agent-hook <claude|codex> <event> < hook.json
+        # Events: idle working waiting resumed compacting todos done ended
         tool=$1
         event=$2
         dir="$(dirname "$0")/Agents"
         if [ ! -d "$dir" ]; then cat >/dev/null; exit 0; fi
-        # After every tool call: only worth reading while one of this tool's sessions is waiting.
-        if [ "$event" = resumed ] && ! grep -qsx waiting "$dir/$tool"-*; then cat >/dev/null; exit 0; fi
+        # After every tool call: only worth reading while one of this tool's sessions is waiting,
+        # compacting, or idle, any of which a tool call means is working again.
+        if [ "$event" = resumed ] && ! grep -qsxE 'waiting|compacting|idle' "$dir/$tool"-*; then
+            cat >/dev/null
+            exit 0
+        fi
         input=$(cat)
         field() { printf '%s' "$input" | /usr/bin/plutil -extract "$1" raw -o - - 2>/dev/null | tr '\n\r' '  '; }
+        value() { field "$1" | sed 's/ *$//'; }
         session=$(field session_id | tr -cd 'A-Za-z0-9._-')
         [ -n "$session" ] || exit 0
         file="$dir/$tool-$session"
+        old() { sed -n "${1}p" "$file" 2>/dev/null; }
+        previous=$(old 1)
+        finished=$(old 8)
+        total=$(old 9)
+        step=$(old 10)
+        since=$(old 11)
+        case $finished in '' | *[!0-9]*) finished=0 ;; esac
+        case $total in '' | *[!0-9]*) total=0 ;; esac
+        case $since in '' | *[!0-9]*) since= ;; esac
         case $event in
         ended) rm -f "$file"; exit 0 ;;
-        resumed) [ "$(head -n 1 "$file" 2>/dev/null)" = waiting ] || exit 0; state=working ;;
-        working | waiting | done) state=$event ;;
+        resumed)
+            case $previous in
+            waiting | compacting | idle) state=working ;;
+            *) exit 0 ;;
+            esac
+            ;;
+        todos)
+            state=working
+            case $(value tool_name) in
+            TodoWrite)
+                todos=$(printf '%s' "$input" | /usr/bin/plutil -extract tool_input.todos json -o - - 2>/dev/null)
+                total=$(printf '%s' "$todos" | grep -o '"status" *: *"' | wc -l | tr -d ' ')
+                finished=$(printf '%s' "$todos" | grep -o '"status" *: *"completed"' | wc -l | tr -d ' ')
+                step=
+                i=0
+                while [ "$i" -lt "$total" ] && [ "$i" -lt 100 ]; do
+                    if [ "$(value "tool_input.todos.$i.status")" = in_progress ]; then
+                        step=$(value "tool_input.todos.$i.activeForm")
+                        break
+                    fi
+                    i=$((i + 1))
+                done
+                ;;
+            TaskCreate) total=$((total + 1)) ;;
+            TaskUpdate)
+                case $(value tool_input.status) in
+                completed) finished=$((finished + 1)) ;;
+                deleted) total=$((total - 1)) ;;
+                in_progress) step=$(value tool_input.activeForm) ;;
+                esac
+                ;;
+            esac
+            [ "$total" -ge 0 ] || total=0
+            [ "$finished" -le "$total" ] || finished=$total
+            ;;
+        working)
+            state=working
+            # A new prompt after a finished list starts counting afresh.
+            if [ "$total" -gt 0 ] && [ "$finished" -ge "$total" ]; then
+                finished=0
+                total=0
+                step=
+            fi
+            ;;
+        idle | waiting | compacting | done) state=$event ;;
         *) exit 0 ;;
         esac
+        # When the turn started, for "Working 4m": kept through approvals and compacting.
+        if [ "$state" = working ]; then
+            case $previous in
+            working | waiting | compacting) [ -n "$since" ] || since=$(date +%s) ;;
+            *) since=$(date +%s) ;;
+            esac
+        fi
+        message=
+        asked=
+        if [ "$state" = waiting ]; then
+            message=$(field message)
+            asked=$(field tool_name)
+        fi
         tmp=$(mktemp "$dir/.$tool.XXXXXX") || exit 0
         {
             printf '%s\n' "$state" "$(field cwd)" "${__CFBundleIdentifier:-}" "${TERM_PROGRAM:-}" "$PPID"
-            printf '%s\n' "$(field message)" "$(field tool_name)"
+            printf '%s\n' "$message" "$asked" "$finished" "$total" "$step" "$since"
         } >"$tmp"
         mv -f "$tmp" "$file"
         exit 0

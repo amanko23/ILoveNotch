@@ -73,8 +73,13 @@ struct AgentHooksTests {
 
         #expect(hooks.isInstalled(.claude) && !hooks.isInstalled(.codex))
         let events = try #require(try sandbox.settings(for: .claude)["hooks"] as? [String: [[String: Any]]])
-        #expect(Set(events.keys) == ["UserPromptSubmit", "Notification", "PostToolUse", "Stop", "SessionEnd"])
+        #expect(
+            Set(events.keys) == [
+                "UserPromptSubmit", "Notification", "PostToolUse", "Stop", "SessionEnd", "SessionStart", "PreCompact",
+            ])
         #expect(events["Stop"]?.count == 2, "theirs first, then ours")
+        let todos = events["PostToolUse"]?.first { $0["matcher"] as? String == AgentTool.todoTools }
+        #expect(todos != nil && events["PostToolUse"]?.count == 2, "every tool call, and the to-do tools")
         let notification = try #require(events["Notification"]?.first)
         #expect(notification["matcher"] as? String == "permission_prompt|elicitation_dialog")
         let handler = try #require((notification["hooks"] as? [[String: Any]])?.first)
@@ -103,6 +108,27 @@ struct AgentHooksTests {
         #expect(events["PermissionRequest"] != nil && events["Notification"] == nil, "Codex asks through its own event")
         try sandbox.hooks.uninstall(.codex)
         #expect(!FileManager.default.fileExists(atPath: sandbox.hooks.configFile(.codex).path))
+    }
+
+    @MainActor
+    @Test func hooksFromAnOlderVersionAreBroughtUpToDate() throws {
+        let sandbox = try Sandbox()
+        let hooks = sandbox.hooks
+        try hooks.install(.claude)
+        #expect(hooks.isCurrent(.claude))
+        // ILoveNotch's five events, as an older version installed them.
+        var settings = try sandbox.settings(for: .claude)
+        var events = try #require(settings["hooks"] as? [String: Any])
+        events["SessionStart"] = nil
+        events["PreCompact"] = nil
+        settings["hooks"] = events
+        try sandbox.write(settings, for: .claude)
+        #expect(hooks.isInstalled(.claude) && !hooks.isCurrent(.claude))
+
+        let defaults = try #require(UserDefaults(suiteName: "Agents.\(UUID().uuidString)"))
+        let agents = AgentsFeature(hooks: hooks, defaults: defaults)
+        agents.refreshConnected()
+        #expect(hooks.isCurrent(.claude), "refreshing adds the new events")
     }
 
     @Test func aToolThatIsntOnThisMacCantBeFound() throws {
@@ -135,6 +161,47 @@ struct AgentHookScriptTests {
         #expect(sandbox.session("claude-abc-123")?.state == .done, "a tool call only resumes a waiting session")
         try sandbox.runHook("claude", "ended", input: prompt)
         #expect(sandbox.session("claude-abc-123") == nil)
+    }
+
+    @Test func theToDoListBecomesProgressAndTheStepItsOn() throws {
+        let sandbox = try Sandbox()
+        try sandbox.hooks.install(.claude)
+        let start = #"{"session_id":"p-1","cwd":"/Users/me/Code/deck","source":"startup"}"#
+        try sandbox.runHook("claude", "idle", input: start)
+        #expect(sandbox.session("claude-p-1")?.state == .idle)
+        try sandbox.runHook("claude", "working", input: start)
+        let todos = #"""
+            {"session_id":"p-1","cwd":"/Users/me/Code/deck","tool_name":"TodoWrite","tool_input":{"todos":[
+             {"content":"Add the target","status":"completed","activeForm":"Adding the target"},
+             {"content":"Run the tests","status":"in_progress","activeForm":"Running the tests"},
+             {"content":"Commit","status":"pending","activeForm":"Committing"}]}}
+            """#
+        try sandbox.runHook("claude", "todos", input: todos)
+        let working = try #require(sandbox.session("claude-p-1"))
+        #expect(working.state == .working && working.todosDone == 1 && working.todosTotal == 3)
+        #expect(working.step == "Running the tests" && working.progress == 1.0 / 3)
+        #expect(working.workingSince != nil)
+
+        try sandbox.runHook("claude", "compacting", input: start)
+        #expect(sandbox.session("claude-p-1")?.state == .compacting)
+        try sandbox.runHook("claude", "resumed", input: start)
+        #expect(sandbox.session("claude-p-1")?.state == .working, "a tool call after compacting means it's working")
+        #expect(sandbox.session("claude-p-1")?.todosTotal == 3, "the list survives every event")
+    }
+
+    @Test func theNewerTaskToolsCountOneTaskAtATime() throws {
+        let sandbox = try Sandbox()
+        try sandbox.hooks.install(.claude)
+        func task(_ tool: String, _ input: String) throws {
+            let payload = #"{"session_id":"t-2","cwd":"/w","tool_name":"\#(tool)","tool_input":\#(input)}"#
+            try sandbox.runHook("claude", "todos", input: payload)
+        }
+        try task("TaskCreate", #"{"subject":"Write docs"}"#)
+        try task("TaskCreate", #"{"subject":"Ship"}"#)
+        try task("TaskUpdate", #"{"taskId":"1","status":"in_progress","activeForm":"Writing docs"}"#)
+        try task("TaskUpdate", #"{"taskId":"1","status":"completed"}"#)
+        let session = try #require(sandbox.session("claude-t-2"))
+        #expect(session.todosDone == 1 && session.todosTotal == 2 && session.step == "Writing docs")
     }
 
     @Test func withoutTheSessionFolderTheHookDoesNothing() throws {
@@ -253,5 +320,11 @@ struct AgentsFeatureTests {
         #expect(session.app == "com.apple.Terminal", "a terminal that doesn't pass its bundle ID on")
         #expect(AgentSession(id: "cursor-1", contents: "done\n\n\n\n1\n", updated: .now) == nil, "not ours")
         #expect(AgentSession(id: "claude-1", contents: "sleeping\n\n\n\n1\n", updated: .now) == nil)
+        let contents = "working\n/w/deck\n\n\n42\n\n\n2\n5\nRunning tests\n1790000000\n"
+        let deck = try #require(AgentSession(id: "claude-8", contents: contents, updated: .now))
+        #expect(deck.todosDone == 2 && deck.todosTotal == 5 && deck.step == "Running tests")
+        let since = Date(timeIntervalSince1970: 1_790_000_000)
+        #expect(deck.workingSince == since)
+        #expect(AgentSession.workingLine(deck, now: since + 4 * 60 + 5) == "Working 4m · Running tests · 2 of 5")
     }
 }

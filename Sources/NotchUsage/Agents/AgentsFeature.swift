@@ -8,7 +8,9 @@ import SwiftUI
 /// One agent session, as its hook last described it.
 public struct AgentSession: Identifiable, Hashable, Sendable {
     public enum State: String, Sendable {
-        case working, waiting, done
+        /// Open, between turns: a session that just started, or one that finished compacting.
+        case idle
+        case working, waiting, compacting, done
     }
 
     /// "<tool>-<session id>", its file's name.
@@ -24,6 +26,18 @@ public struct AgentSession: Identifiable, Hashable, Sendable {
     /// What it's waiting for, in the tool's words.
     public var detail: String?
     public var updated: Date
+    /// Its to-do list (Claude Code's TodoWrite or task tools): how many are done, of how many.
+    public var todosDone = 0
+    public var todosTotal = 0
+    /// The to-do it's on, in its own words ("Running tests").
+    public var step: String?
+    /// When its current turn started.
+    public var workingSince: Date?
+
+    /// How far through its to-do list it is, 0...1, or nil without a list.
+    public var progress: Double? {
+        todosTotal > 0 ? min(Double(todosDone) / Double(todosTotal), 1) : nil
+    }
 
     /// Reads a session file: one field per line, as the hook script writes it.
     init?(id: String, contents: String, updated: Date) {
@@ -44,15 +58,27 @@ public struct AgentSession: Identifiable, Hashable, Sendable {
         process = text(4).flatMap { pid_t($0) }
         detail = text(5) ?? text(6).map { "Wants to use \($0)" }
         self.updated = updated
+        // NotchDeck's fields, which an older hook script leaves out.
+        todosDone = text(7).flatMap { Int($0) } ?? 0
+        todosTotal = text(8).flatMap { Int($0) } ?? 0
+        step = text(9)
+        workingSince = text(10).flatMap { TimeInterval($0) }.map { Date(timeIntervalSince1970: $0) }
     }
 
-    init(id: String, tool: AgentTool, state: State, project: String, app: String? = nil, updated: Date) {
+    public init(
+        id: String, tool: AgentTool, state: State, project: String, app: String? = nil, updated: Date,
+        todosDone: Int = 0, todosTotal: Int = 0, step: String? = nil, workingSince: Date? = nil
+    ) {
         self.id = id
         self.tool = tool
         self.state = state
         self.project = project
         self.app = app
         self.updated = updated
+        self.todosDone = todosDone
+        self.todosTotal = todosTotal
+        self.step = step
+        self.workingSince = workingSince
     }
 
     /// `TERM_PROGRAM` to bundle ID, for terminals that don't pass their bundle ID on.
@@ -124,10 +150,20 @@ public final class AgentsFeature: NotchFeature {
 
     public func disconnect(_ tool: AgentTool) { change { try hooks.uninstall(tool) } }
 
-    /// Looks at the tools' settings again, which the user may have edited by hand.
+    /// Looks at the tools' settings again, which the user may have edited by hand. Hooks from an
+    /// older version are brought up to date, so new events reach a tool that's already connected.
     public func refreshConnected() {
         connected = Set(AgentTool.allCases.filter(hooks.isInstalled))
-        if !connected.isEmpty { hooks.refreshScript() }
+        guard !connected.isEmpty else { return }
+        hooks.refreshScript()
+        for tool in connected where !hooks.isCurrent(tool) {
+            try? hooks.install(tool)
+        }
+    }
+
+    /// Sessions at work right now, the busiest first: for Home and the closed notch.
+    public var active: [AgentSession] {
+        sessions.filter { $0.state == .working || $0.state == .compacting || $0.state == .waiting }
     }
 
     /// Brings the app the session runs in forward. Through Launch Services, like opening Calendar

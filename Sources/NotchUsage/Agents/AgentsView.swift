@@ -61,6 +61,12 @@ struct AgentsView: View {
                     .font(.caption)
                     .foregroundStyle(waiting ? .orange : .white.opacity(0.55))
                     .lineLimit(1)
+                if let progress = session.progress, session.state != .done {
+                    let tint = waiting ? Color.orange : ProviderStyle.of(session.tool.rawValue).start
+                    AgentProgressBar(progress: progress, tint: tint)
+                        .padding(.top, 3)
+                        .accessibilityLabel("\(session.todosDone) of \(session.todosTotal) to-dos done")
+                }
             }
             Spacer(minLength: 0)
             if session.app != nil {
@@ -88,11 +94,51 @@ struct AgentsView: View {
     @ViewBuilder private func status(_ session: AgentSession) -> some View {
         switch session.state {
         case .waiting: Text("\(session.tool.shortName) needs you: \(session.detail ?? "waiting for approval")")
-        case .working: Text("\(session.tool.shortName) is working")
+        case .working: Text(AgentSession.workingLine(session))
+        case .compacting: Text("\(session.tool.shortName) is compacting its context")
+        case .idle: Text("\(session.tool.shortName) is ready")
         // Fixed when drawn, not a ticking clock: it's redrawn whenever the tab is.
         case .done:
             Text("\(session.tool.shortName) finished \(session.updated.formatted(.relative(presentation: .named)))")
         }
+    }
+}
+
+extension AgentSession {
+    /// "Working 4m · Running tests · 2 of 5": how long this turn has run, the step it's on, and how
+    /// far through its to-dos it is, whichever it reported.
+    public static func workingLine(_ session: AgentSession, now: Date = .now) -> String {
+        var parts = ["Working"]
+        if let since = session.workingSince {
+            let minutes = Int(now.timeIntervalSince(since) / 60)
+            if minutes >= 1 { parts[0] += minutes >= 60 ? " \(minutes / 60)h \(minutes % 60)m" : " \(minutes)m" }
+        }
+        if let step = session.step { parts.append(step) }
+        if session.todosTotal > 0 { parts.append("\(session.todosDone) of \(session.todosTotal)") }
+        return parts.joined(separator: " · ")
+    }
+}
+
+/// A slim bar for an agent's to-do progress.
+public struct AgentProgressBar: View {
+    let progress: Double
+    let tint: Color
+
+    public init(progress: Double, tint: Color) {
+        self.progress = progress
+        self.tint = tint
+    }
+
+    public var body: some View {
+        Capsule()
+            .fill(.white.opacity(0.15))
+            .frame(height: 4)
+            .overlay(alignment: .leading) {
+                GeometryReader { track in
+                    Capsule().fill(tint).frame(width: max(4, track.size.width * min(max(progress, 0), 1)))
+                }
+            }
+            .animation(.spring(response: 0.4, dampingFraction: 0.85), value: progress)
     }
 }
 
