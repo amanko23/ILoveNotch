@@ -15,7 +15,7 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         self.openSettings = openSettings
         super.init()
         statusItem.button?.image = NSImage(
-            systemSymbolName: "rectangle.topthird.inset.filled", accessibilityDescription: "ILoveNotch")
+            systemSymbolName: "rectangle.topthird.inset.filled", accessibilityDescription: "NotchDeck")
         let menu = NSMenu()
         menu.delegate = self
         statusItem.menu = menu
@@ -23,18 +23,13 @@ final class StatusItemController: NSObject, NSMenuDelegate {
 
     func menuNeedsUpdate(_ menu: NSMenu) {
         menu.removeAllItems()
-        menu.addItem(.sectionHeader(title: "ILoveNotch \(Updater.version)"))
+        menu.addItem(.sectionHeader(title: "NotchDeck \(Updater.version)"))
         menu.addItem(menuItem("Settings…", symbol: "gearshape", #selector(showSettings), key: ","))
         for item in updateItems() { menu.addItem(item) }
         menu.addItem(.separator())
-        menu.addItem(menuItem("About ILoveNotch", symbol: "info.circle", #selector(showAbout)))
-        #if !APP_STORE  // the App Store tells its edition's story itself, and takes no outside payments (3.1.1)
-            menu.addItem(
-                menuItem("What's New in \(Updater.shortVersion)", symbol: "sparkles", #selector(showReleaseNotes)))
-            menu.addItem(menuItem("Sponsor ILoveNotch…", symbol: "heart", #selector(sponsor)))
-        #endif
+        menu.addItem(menuItem("About NotchDeck", symbol: "info.circle", #selector(showAbout)))
         menu.addItem(.separator())
-        let quit = NSMenuItem(title: "Quit ILoveNotch", action: #selector(NSApplication.terminate), keyEquivalent: "q")
+        let quit = NSMenuItem(title: "Quit NotchDeck", action: #selector(NSApplication.terminate), keyEquivalent: "q")
         quit.image = NSImage(systemSymbolName: "power", accessibilityDescription: nil)
         menu.addItem(quit)
     }
@@ -45,13 +40,13 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         #else
             let symbol = "arrow.triangle.2.circlepath"
             guard updater.sourceDirectory != nil else {
-                return [menuItem("Check for Updates…", symbol: symbol, #selector(checkForUpdates))]
+                return [menuItem("ILoveNotch Releases…", symbol: symbol, #selector(checkForUpdates))]
             }
             switch updater.state {
             case .idle:
-                return [menuItem("Update ILoveNotch", symbol: symbol, #selector(update))]
+                return [menuItem("Update NotchDeck", symbol: symbol, #selector(update))]
             case .updating:
-                let item = menuItem("Updating ILoveNotch…", symbol: symbol, nil)
+                let item = menuItem("Updating NotchDeck…", symbol: symbol, nil)
                 item.isEnabled = false
                 return [item]
             case .failed:
@@ -72,24 +67,16 @@ final class StatusItemController: NSObject, NSMenuDelegate {
 
     @objc private func showSettings() { openSettings(nil) }
     @objc private func showAbout() { openSettings(.about) }
-    @objc private func showReleaseNotes() { NSWorkspace.shared.open(Links.releaseNotes(Updater.shortVersion)) }
-    @objc private func sponsor() { NSWorkspace.shared.open(Links.sponsor) }
     @objc private func update() { updater.updateFromSource() }
     @objc private func showLog() { updater.showLog() }
     @objc private func checkForUpdates() { updater.checkForUpdates() }
 }
 
+/// NotchDeck is a personal fork of ILoveNotch (MIT): these point at the upstream project it's built on.
 enum Links {
-    static let repository = URL(string: "https://github.com/niyamvora/ILoveNotch")!
-    static let releases = URL(string: "https://github.com/niyamvora/ILoveNotch/releases")!
-    static let sponsor = URL(string: "https://github.com/sponsors/niyamvora")!
-    static let contributing = URL(string: "https://github.com/niyamvora/ILoveNotch/blob/main/CONTRIBUTING.md")!
-    static let newIssue = URL(string: "https://github.com/niyamvora/ILoveNotch/issues/new/choose")!
-    static let privacy = URL(string: "https://github.com/niyamvora/ILoveNotch/blob/main/PRIVACY.md")!
-    /// Rendered on GitHub; the direct download also carries a copy in its Resources.
+    static let upstream = URL(string: "https://github.com/niyamvora/ILoveNotch")!
+    static let upstreamReleases = URL(string: "https://github.com/niyamvora/ILoveNotch/releases")!
+    /// Rendered on GitHub; the app also carries a copy in its Resources.
     static let acknowledgements = URL(
         string: "https://github.com/niyamvora/ILoveNotch/blob/main/THIRD_PARTY_NOTICES.md")!
-
-    /// A release's page, with its notes and download.
-    static func releaseNotes(_ version: String) -> URL { releases.appending(path: "tag/v\(version)") }
 }

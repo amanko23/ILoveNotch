@@ -203,7 +203,7 @@ private struct SettingsIcon: View {
     }
 }
 
-/// ILoveNotch itself, at the top of the sidebar where System Settings puts your account: it opens
+/// NotchDeck itself, at the top of the sidebar where System Settings puts your account: it opens
 /// About.
 private struct AppRow: View {
     var body: some View {
@@ -213,7 +213,7 @@ private struct AppRow: View {
                 .frame(width: 36, height: 36)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 1) {
-                Text("ILoveNotch").font(.headline)
+                Text("NotchDeck").font(.headline)
                 Text("Version \(Updater.version)").font(.caption).foregroundStyle(.secondary)
             }
         }
@@ -328,7 +328,7 @@ private struct GeneralPage: View {
                     Text("Reset to defaults")
                     Text("Tabs, their order, shortcuts, appearance, and displays. Your notes, shelf, and history stay.")
                 }
-                .confirmationDialog("Reset ILoveNotch's settings?", isPresented: $confirmsReset) {
+                .confirmationDialog("Reset NotchDeck's settings?", isPresented: $confirmsReset) {
                     Button("Reset to Defaults", role: .destructive) { preferences.reset() }
                 } message: {
                     Text("Every tab comes back in its first place, with the original shortcuts and look.")
@@ -481,7 +481,7 @@ private struct DisplaysPage: View {
             Section {
                 Toggle(isOn: $preferences.showOnAllDisplays) {
                     Text("Show on all displays")
-                    Text("Otherwise ILoveNotch uses the built-in display's notch, or the main display.")
+                    Text("Otherwise NotchDeck uses the built-in display's notch, or the main display.")
                 }
             }
             Section {
@@ -613,12 +613,13 @@ private struct ShortcutRecorder: View {
     }
 }
 
-/// The app, its version and updates, then asks for a star and for help, in the icon's coral and peach.
+/// The app, its version and updates, and where it comes from: NotchDeck is a personal fork of
+/// ILoveNotch, whose MIT license travels with it.
 private struct AboutSettings: View {
     let updater: Updater
 
-    static let coral = Color(red: 0.93, green: 0.30, blue: 0.24)
-    static let peach = Color(red: 0.95, green: 0.50, blue: 0.22)
+    static let clay = Color(red: 0.85, green: 0.47, blue: 0.34)
+    static let dusk = Color(red: 0.45, green: 0.36, blue: 0.78)
 
     var body: some View {
         VStack(spacing: 12) {
@@ -627,14 +628,13 @@ private struct AboutSettings: View {
                 .frame(width: 72, height: 72)
                 .background {
                     Circle()
-                        .fill(LinearGradient(colors: [Self.coral, Self.peach], startPoint: .top, endPoint: .bottom))
+                        .fill(LinearGradient(colors: [Self.clay, Self.dusk], startPoint: .top, endPoint: .bottom))
                         .blur(radius: 26)
                         .opacity(0.45)
                 }
                 .accessibilityHidden(true)
             VStack(spacing: 4) {
-                (Text("I") + Text("Love").foregroundStyle(Self.coral) + Text("Notch"))
-                    .font(.system(.title, design: .rounded).bold())
+                Text("NotchDeck").font(.system(.title, design: .rounded).bold())
                 Text("Version \(Updater.version)")
                     .font(.caption.monospacedDigit())
                     .foregroundStyle(.secondary)
@@ -642,26 +642,24 @@ private struct AboutSettings: View {
                     .padding(.vertical, 2)
                     .background(.quaternary, in: Capsule())
             }
-            #if !APP_STORE  // the App Store updates its edition
-                if updater.sourceDirectory != nil {
-                    Button(
-                        updater.state == .updating ? "Updating…" : "Update ILoveNotch", action: updater.updateFromSource
-                    )
+            if updater.sourceDirectory != nil {
+                Button(updater.state == .updating ? "Updating…" : "Update NotchDeck", action: updater.updateFromSource)
                     .disabled(updater.state == .updating)
-                    if updater.state == .failed {
-                        Button("The update failed. Show Log", action: updater.showLog).buttonStyle(.link)
-                    }
-                    Text("Rebuilds from this Mac's checkout and relaunches.").font(.caption).foregroundStyle(.secondary)
-                } else {
-                    Button("Check for Updates…", action: updater.checkForUpdates)
+                if updater.state == .failed {
+                    Button("The update failed. Show Log", action: updater.showLog).buttonStyle(.link)
                 }
-            #endif
-            AboutCard(url: Links.repository, glow: Self.coral) {
+                Text("Pulls main when it's safe, rebuilds this Mac's checkout, and relaunches.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            AboutCard(url: Links.upstream, glow: Self.clay) {
                 HStack(spacing: 12) {
-                    Image(systemName: "star.fill").font(.title)
+                    Image(systemName: "heart.fill").font(.title)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Star ILoveNotch on GitHub").font(.headline)
-                        Text("A star is how other Mac users find it.").font(.callout).opacity(0.9)
+                        Text("Built on ILoveNotch").font(.headline)
+                        Text("Niyam Vora's open-source notch app, MIT licensed. Star it on GitHub.")
+                            .font(.callout)
+                            .opacity(0.9)
                     }
                     Spacer(minLength: 0)
                     Image(systemName: "arrow.up.right").font(.callout.bold())
@@ -669,29 +667,13 @@ private struct AboutSettings: View {
                 .foregroundStyle(.white)
                 .padding(14)
                 .background(
-                    LinearGradient(colors: [Self.coral, Self.peach], startPoint: .leading, endPoint: .trailing),
+                    LinearGradient(colors: [Self.clay, Self.dusk], startPoint: .leading, endPoint: .trailing),
                     in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-            }
-            HStack(spacing: 10) {
-                AboutTile(
-                    title: "Contribute", detail: "Good first issues", symbol: "chevron.left.forwardslash.chevron.right",
-                    tint: .blue, url: Links.contributing)
-                AboutTile(
-                    title: "Report a Bug", detail: "Or ask for a feature", symbol: "ladybug.fill", tint: .orange,
-                    url: Links.newIssue)
-                #if !APP_STORE  // the App Store takes no outside payments (3.1.1)
-                    AboutTile(
-                        title: "Sponsor", detail: "Fuel the next one", symbol: "heart.fill", tint: .pink,
-                        url: Links.sponsor)
-                #endif
             }
             Spacer(minLength: 0)
             VStack(spacing: 4) {
                 Text("MIT licensed. Local-first: no accounts, no telemetry.").foregroundStyle(.secondary)
-                HStack(spacing: 14) {
-                    Link("Privacy", destination: Links.privacy)
-                    Link("Acknowledgements", destination: Links.acknowledgements)
-                }
+                Link("Acknowledgements", destination: Links.acknowledgements)
             }
             .font(.caption)
         }
@@ -716,31 +698,5 @@ private struct AboutCard<Content: View>: View {
             .animation(.easeOut(duration: 0.15), value: hovering)
             .accessibilityElement(children: .combine)
             .accessibilityAddTraits(.isLink)
-    }
-}
-
-private struct AboutTile: View {
-    let title: String
-    let detail: String
-    let symbol: String
-    let tint: Color
-    let url: URL
-
-    var body: some View {
-        AboutCard(url: url, glow: tint) {
-            VStack(spacing: 6) {
-                Image(systemName: symbol)
-                    .font(.title3)
-                    .foregroundStyle(tint)
-                    .frame(width: 34, height: 34)
-                    .background(tint.opacity(0.15), in: Circle())
-                Text(title).font(.callout.weight(.semibold))
-                Text(detail).font(.caption).foregroundStyle(.secondary)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
-            .background(.background.secondary, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(tint.opacity(0.25)))
-        }
     }
 }

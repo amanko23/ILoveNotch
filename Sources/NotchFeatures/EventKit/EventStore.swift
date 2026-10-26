@@ -40,7 +40,7 @@ struct EventAccessView: View {
             FeatureUnavailableView(
                 symbol: "lock",
                 title: "\(what.capitalized) access is off",
-                message: "Turn on ILoveNotch in System Settings › Privacy & Security › \(what.capitalized).",
+                message: "Turn on NotchDeck in System Settings › Privacy & Security › \(what.capitalized).",
                 action: (
                     label: "Open Privacy Settings",
                     perform: { NSWorkspace.shared.open(.privacySettings(settingsPane)) }
@@ -49,7 +49,7 @@ struct EventAccessView: View {
             FeatureUnavailableView(
                 symbol: symbol,
                 title: "Show your \(what) here",
-                message: "ILoveNotch reads your \(what) on this Mac only. Nothing leaves your Mac.",
+                message: "NotchDeck reads your \(what) on this Mac only. Nothing leaves your Mac.",
                 action: (label: "Continue", perform: request))  // App Review 5.1.1(iv): not "Allow"
         }
     }

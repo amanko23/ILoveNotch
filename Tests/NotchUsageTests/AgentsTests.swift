@@ -79,7 +79,7 @@ struct AgentHooksTests {
         #expect(notification["matcher"] as? String == "permission_prompt|elicitation_dialog")
         let handler = try #require((notification["hooks"] as? [[String: Any]])?.first)
         #expect(handler["async"] as? Bool == true, "the agent never waits on it")
-        #expect((handler["command"] as? String)?.hasSuffix("ilovenotch-agent-hook' claude waiting") == true)
+        #expect((handler["command"] as? String)?.hasSuffix("notchdeck-agent-hook' claude waiting") == true)
         let attributes = try FileManager.default.attributesOfItem(atPath: hooks.configFile(.claude).path)
         #expect(attributes[.posixPermissions] as? Int == 0o700, "a private settings file stays private")
 

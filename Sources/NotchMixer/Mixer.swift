@@ -79,7 +79,7 @@ public final class Mixer {
     public private(set) var outputs: [SoundDevice] = []
     public private(set) var inputs: [SoundDevice] = []
     /// An app turned down here has played for a while without any tap hearing it: macOS hasn't let
-    /// ILoveNotch record system audio.
+    /// NotchDeck record system audio.
     public private(set) var needsPermission = false
     /// The Sound tab is on. Off, every app plays at its own volume and nothing listens.
     public var isEnabled = false {
@@ -118,7 +118,7 @@ public final class Mixer {
     @ObservationIgnored private var order: [String] = []
     /// Apps the open mixer has shown, which stay until it closes.
     @ObservationIgnored private var shown: Set<String> = []
-    /// A tap heard sound this session, so macOS lets ILoveNotch record system audio.
+    /// A tap heard sound this session, so macOS lets NotchDeck record system audio.
     @ObservationIgnored private var heard = false
     @ObservationIgnored private var icons: [String: NSImage] = [:]
     @ObservationIgnored private var tints: [String: Color] = [:]
@@ -541,8 +541,8 @@ public final class Mixer {
         var outputs: [SoundDevice] = []
         var inputs: [SoundDevice] = []
         for device in AudioObjectID.system.readList(kAudioHardwarePropertyDevices) {
-            // The mixer's and the waveform's own aggregate devices, which only ILoveNotch sees.
-            guard let uid = device.readString(kAudioDevicePropertyDeviceUID), !uid.hasPrefix("cafe.opennotch."),
+            // The mixer's and the waveform's own aggregate devices, which only NotchDeck sees.
+            guard let uid = device.readString(kAudioDevicePropertyDeviceUID), !uid.hasPrefix("com.amankothari.notchdeck."),
                 device.read(kAudioDevicePropertyIsHidden, default: UInt32(0)) == 0
             else { continue }
             let name = device.readString(kAudioObjectPropertyName) ?? uid
@@ -632,7 +632,7 @@ struct AppIdentity: Hashable {
 
 extension AppIdentity {
     /// Nil for a process with no app to show: daemons, macOS's own services (Control Center, the
-    /// charging chime), background-only apps, and ILoveNotch itself.
+    /// charging chime), background-only apps, and NotchDeck itself.
     @MainActor
     init?(process: AudioObjectID) {
         let pid = process.read(kAudioProcessPropertyPID, default: pid_t(-1))

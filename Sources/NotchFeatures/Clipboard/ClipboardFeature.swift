@@ -23,7 +23,7 @@ public struct ClipItem: Codable, Identifiable, Hashable, Sendable {
     var paths: [String] { kind == .files ? text.split(separator: "\n").map(String.init) : [] }
 }
 
-/// Whether macOS lets ILoveNotch read what's copied. Since macOS 15.4 an app that reads the
+/// Whether macOS lets NotchDeck read what's copied. Since macOS 15.4 an app that reads the
 /// clipboard on its own asks first, until the user allows it in System Settings.
 public enum ClipboardAccess: Equatable, Sendable {
     /// It hasn't asked yet.
@@ -124,8 +124,8 @@ public final class ClipboardFeature: NotchFeature {
     /// Whether the change count is being checked.
     var isPolling: Bool { poll != nil }
 
-    /// Starts keeping a history. Before macOS lets ILoveNotch read the clipboard, this read makes it
-    /// ask once and list ILoveNotch in System Settings, where the user can always allow it.
+    /// Starts keeping a history. Before macOS lets NotchDeck read the clipboard, this read makes it
+    /// ask once and list NotchDeck in System Settings, where the user can always allow it.
     public func startRecording() {
         isRecording = true
         refreshAccess()

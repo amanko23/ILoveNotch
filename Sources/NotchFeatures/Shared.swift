@@ -3,11 +3,11 @@ import AppKit
 import Foundation
 import SwiftUI
 
-/// Where OpenNotch keeps its local data: ~/Library/Application Support/OpenNotch.
+/// Where NotchDeck keeps its local data: ~/Library/Application Support/NotchDeck.
 public enum AppSupport {
     public static func file(_ name: String) -> URL {
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        let directory = base.appending(path: "OpenNotch", directoryHint: .isDirectory)
+        let directory = base.appending(path: "NotchDeck", directoryHint: .isDirectory)
         try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         return directory.appending(path: name)
     }

@@ -54,7 +54,7 @@ public enum AgentHooksError: LocalizedError, Equatable {
 
     public var errorDescription: String? {
         switch self {
-        case .unreadable(let path): "\(path) isn't a JSON object ILoveNotch can read, so it wasn't changed."
+        case .unreadable(let path): "\(path) isn't a JSON object NotchDeck can read, so it wasn't changed."
         }
     }
 }
@@ -65,14 +65,14 @@ public enum AgentHooksError: LocalizedError, Equatable {
 /// `AgentsFeature` watches.
 public struct AgentHooks: Sendable {
     let home: URL
-    /// The hook script, named so ILoveNotch can always tell its hooks from anyone else's.
+    /// The hook script, named so NotchDeck can always tell its hooks from anyone else's.
     let script: URL
     /// Where the script writes each session's state.
     let states: URL
-    /// A copy of each settings file from just before ILoveNotch last changed it.
+    /// A copy of each settings file from just before NotchDeck last changed it.
     let backups: URL
 
-    static let scriptName = "ilovenotch-agent-hook"
+    static let scriptName = "notchdeck-agent-hook"
 
     public init() {
         self.init(
@@ -151,7 +151,7 @@ public struct AgentHooks: Sendable {
         }
         let changed = change(settings)
         guard !NSDictionary(dictionary: changed).isEqual(to: settings) else { return }
-        // Codex's hooks.json holds only hooks: one ILoveNotch emptied goes, rather than stay empty.
+        // Codex's hooks.json holds only hooks: one NotchDeck emptied goes, rather than stay empty.
         if tool == .codex, changed.isEmpty {
             try? fileManager.removeItem(at: file)
             return
@@ -226,9 +226,9 @@ public struct AgentHooks: Sendable {
     /// JSON, since macOS 14 has no `jq`. It never blocks the agent and always exits 0.
     static let scriptSource = #"""
         #!/bin/sh
-        # ILoveNotch agent status, run by Claude Code's and Codex's hooks. ILoveNotch adds the hooks
+        # NotchDeck agent status, run by Claude Code's and Codex's hooks. NotchDeck adds the hooks
         # when you connect a tool in Settings > Agents and removes them when you disconnect.
-        # Usage: ilovenotch-agent-hook <claude|codex> <working|waiting|resumed|done|ended> < hook.json
+        # Usage: notchdeck-agent-hook <claude|codex> <working|waiting|resumed|done|ended> < hook.json
         tool=$1
         event=$2
         dir="$(dirname "$0")/Agents"

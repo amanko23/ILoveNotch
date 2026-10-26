@@ -116,7 +116,7 @@ final class IncomingFile {
             var values = URLResourceValues()
             values.quarantineProperties = [
                 kLSQuarantineTypeKey as String: kLSQuarantineTypeOtherDownload as String,
-                kLSQuarantineAgentNameKey as String: "ILoveNotch",
+                kLSQuarantineAgentNameKey as String: "NotchDeck",
             ]
             try? destination.setResourceValues(values)
             return destination

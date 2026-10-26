@@ -231,7 +231,7 @@ public final class NotesFeature: NotchFeature {
         if selected == nil { selection = visibleNotes.first?.id }
     }
 
-    /// Writes every unsaved note now, renaming a file ILoveNotch named when its title changed; a note
+    /// Writes every unsaved note now, renaming a file NotchDeck named when its title changed; a note
     /// emptied out is deleted rather than kept blank.
     func flush() {
         pendingSave?.cancel()

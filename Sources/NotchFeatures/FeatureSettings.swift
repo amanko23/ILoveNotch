@@ -118,7 +118,7 @@ private struct NotesSettings: View {
         panel.canChooseDirectories = true
         panel.canCreateDirectories = true
         panel.prompt = "Use Folder"
-        panel.message = "Choose where ILoveNotch keeps your notes."
+        panel.message = "Choose where NotchDeck keeps your notes."
         let iCloudDrive = FileManager.default.homeDirectoryForCurrentUser
             .appending(path: "Library/Mobile Documents/com~apple~CloudDocs", directoryHint: .isDirectory)
         if FileManager.default.fileExists(atPath: iCloudDrive.path) { panel.directoryURL = iCloudDrive }

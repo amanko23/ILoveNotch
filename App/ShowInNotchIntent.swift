@@ -4,7 +4,7 @@ import AppKit
 import NotchFeatures
 
 /// The Show in Notch action in Shortcuts: a short message in the notch for a few seconds. It runs
-/// in the background; ILoveNotch starts if it isn't running.
+/// in the background; NotchDeck starts if it isn't running.
 struct ShowInNotchIntent: AppIntent {
     static let title: LocalizedStringResource = "Show in Notch"
     static let description = IntentDescription(

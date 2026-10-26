@@ -55,7 +55,7 @@ struct FeatureSnapshotTests {
         clipboard.phase = .foreground
         try render(clipboard.view, name: "clipboard-off")
         clipboard.startRecording()
-        for text in ["Meeting at 4 in the big room", "https://github.com/niyamvora/ILoveNotch", "make install"] {
+        for text in ["Meeting at 4 in the big room", "https://github.com/niyamvora/NotchDeck", "make install"] {
             pasteboard.clearContents()
             pasteboard.setString(text, forType: .string)
             clipboard.check()

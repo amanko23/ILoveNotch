@@ -46,7 +46,7 @@ final class AppTap: @unchecked Sendable {
     private let replacing: Bool
     private let heard: @MainActor @Sendable () -> Void
     private let state: UnsafeMutablePointer<RenderState>
-    private let queue = DispatchQueue(label: "cafe.opennotch.mixer", qos: .userInteractive)
+    private let queue = DispatchQueue(label: "com.amankothari.notchdeck.mixer", qos: .userInteractive)
     private var tapID = AudioObjectID(kAudioObjectUnknown)
     private var aggregateID = AudioObjectID(kAudioObjectUnknown)
     private var procID: AudioDeviceIOProcID?
@@ -69,7 +69,7 @@ final class AppTap: @unchecked Sendable {
         description = CATapDescription(stereoMixdownOfProcesses: processes)
         description.uuid = UUID()
         description.isPrivate = true
-        description.name = "ILoveNotch \(app)"
+        description.name = "NotchDeck \(app)"
         description.muteBehavior =
             switch mode {
             case .silence: .muted
@@ -158,8 +158,8 @@ final class AppTap: @unchecked Sendable {
         // The tap rides on the real output device: its clock drives the IO proc, and what the IO proc
         // writes plays there. Only a tap listed at creation joins the aggregate.
         let aggregate: [String: Any] = [
-            kAudioAggregateDeviceNameKey: "ILoveNotch mixer",
-            kAudioAggregateDeviceUIDKey: "cafe.opennotch.mixer.\(UUID().uuidString)",
+            kAudioAggregateDeviceNameKey: "NotchDeck mixer",
+            kAudioAggregateDeviceUIDKey: "com.amankothari.notchdeck.mixer.\(UUID().uuidString)",
             kAudioAggregateDeviceMainSubDeviceKey: deviceUID,
             kAudioAggregateDeviceIsPrivateKey: true,
             kAudioAggregateDeviceIsStackedKey: false,
@@ -311,7 +311,7 @@ struct RenderState {
     /// 1 once the app is muted at its source, so this is its only sound. Until then the IO proc
     /// writes silence, so the app never plays twice.
     var replacing: UInt32 = 0
-    /// 1 once the tap has delivered sound: macOS lets ILoveNotch hear the app.
+    /// 1 once the tap has delivered sound: macOS lets NotchDeck hear the app.
     var heard: UInt32 = 0
     var cycles: UInt32 = 0
 }

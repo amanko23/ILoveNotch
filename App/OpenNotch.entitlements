@@ -10,9 +10,13 @@
 	<!-- The Mirror tab. -->
 	<key>com.apple.security.device.camera</key>
 	<true/>
-	<!-- Music and Spotify's AppleScript, for the media tab's shuffle, repeat, up next, and lyrics.
-	     macOS asks once per app (Privacy & Security › Automation). -->
+	<!-- Music and Spotify's AppleScript, for the media tab's shuffle, repeat, up next, and lyrics,
+	     and System Events for Home's light/dark switch. macOS asks once per app (Privacy & Security ›
+	     Automation). -->
 	<key>com.apple.security.automation.apple-events</key>
+	<true/>
+	<!-- Home's weather: Core Location, once, for the forecast where you are. -->
+	<key>com.apple.security.personal-information.location</key>
 	<true/>
 </dict>
 </plist>

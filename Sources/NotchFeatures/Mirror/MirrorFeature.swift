@@ -70,7 +70,7 @@ public final class MirrorFeature: NotchFeature {
 /// moment. Configured on first use with the built-in camera, or else the first one found.
 final class CameraSession: @unchecked Sendable {
     let session = AVCaptureSession()
-    private let queue = DispatchQueue(label: "cafe.opennotch.mirror", qos: .userInitiated)
+    private let queue = DispatchQueue(label: "com.amankothari.notchdeck.mirror", qos: .userInitiated)
     // Only touched on `queue`.
     private var configured = false
 

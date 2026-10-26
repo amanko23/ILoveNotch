@@ -191,7 +191,7 @@ private struct ReceiveControl: View {
                 } label: {
                     Label("Allow Local Network", systemImage: "exclamationmark.triangle.fill").foregroundStyle(.orange)
                 }
-                .help("macOS stops ILoveNotch from finding phones until Local Network is on for it")
+                .help("macOS stops NotchDeck from finding phones until Local Network is on for it")
             } else if let until = transfer.visibleUntil {
                 Button(action: transfer.stopReceiving) {
                     Label {
@@ -336,7 +336,7 @@ struct SendView: View {
 
     private var localNetworkNotice: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Label("Local network access is off for ILoveNotch", systemImage: "exclamationmark.triangle.fill")
+            Label("Local network access is off for NotchDeck", systemImage: "exclamationmark.triangle.fill")
                 .foregroundStyle(.orange)
             Text("Quick Share finds phones on your Wi-Fi, which macOS asks you to allow.")
                 .font(.callout).foregroundStyle(.secondary)

@@ -155,7 +155,7 @@ private final class SystemAudioTap: @unchecked Sendable {
     }
 
     private let deliver: @Sendable ([Float]) -> Void
-    private let queue = DispatchQueue(label: "cafe.opennotch.audio-tap", qos: .userInteractive)
+    private let queue = DispatchQueue(label: "com.amankothari.notchdeck.audio-tap", qos: .userInteractive)
     private var tapID = AudioObjectID(kAudioObjectUnknown)
     private var aggregateID = AudioObjectID(kAudioObjectUnknown)
     private var procID: AudioDeviceIOProcID?
@@ -179,7 +179,7 @@ private final class SystemAudioTap: @unchecked Sendable {
         description.uuid = UUID()
         description.muteBehavior = .unmuted
         description.isPrivate = true
-        description.name = "ILoveNotch waveform"
+        description.name = "NotchDeck waveform"
         try check("create the tap", AudioHardwareCreateProcessTap(description, &tapID))
         do {
             let format: AudioStreamBasicDescription = try read(tapID, kAudioTapPropertyFormat)
@@ -190,8 +190,8 @@ private final class SystemAudioTap: @unchecked Sendable {
             let outputUID = try deviceUID(output)
             // The tap rides on the real output device; a tap alone as the main device hears nothing.
             let aggregate: [String: Any] = [
-                kAudioAggregateDeviceNameKey: "ILoveNotch waveform",
-                kAudioAggregateDeviceUIDKey: "cafe.opennotch.waveform.\(UUID().uuidString)",
+                kAudioAggregateDeviceNameKey: "NotchDeck waveform",
+                kAudioAggregateDeviceUIDKey: "com.amankothari.notchdeck.waveform.\(UUID().uuidString)",
                 kAudioAggregateDeviceMainSubDeviceKey: outputUID,
                 kAudioAggregateDeviceIsPrivateKey: true,
                 kAudioAggregateDeviceIsStackedKey: false,

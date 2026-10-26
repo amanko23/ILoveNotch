@@ -2,14 +2,10 @@
 import AppKit
 import Observation
 
-#if !APP_STORE
-    import Sparkle
-#endif
-
-/// Keeps OpenNotch current. A build made from a local checkout (`make run` or `make install`)
+/// Keeps NotchDeck current. A build made from a local checkout (`make run` or `make install`)
 /// updates by rebuilding that checkout: `scripts/update.sh` fast-forwards main when that's safe,
-/// builds, reinstalls into /Applications, and relaunches. Every other build updates through Sparkle
-/// from the signed appcast (docs/updates.md), which asks before checking on its own.
+/// builds, reinstalls into /Applications, and relaunches. NotchDeck has no update feed of its own,
+/// and it never takes ILoveNotch's: a build without its checkout just opens the repository.
 @MainActor
 @Observable
 final class Updater {
@@ -24,23 +20,11 @@ final class Updater {
     /// The checkout this build came from, when it's still on this Mac.
     let sourceDirectory: URL?
 
-    #if APP_STORE
-        // The App Store updates this edition.
-        init() { sourceDirectory = nil }
-    #else
-        /// Sparkle, for builds that don't come from a checkout on this Mac.
-        private let sparkle: SPUStandardUpdaterController?
-
-        init() {
-            let path = Bundle.main.object(forInfoDictionaryKey: "OpenNotchSourceDirectory") as? String ?? ""
-            let checkout = !path.isEmpty && FileManager.default.fileExists(atPath: path + "/scripts/update.sh")
-            sourceDirectory = checkout ? URL(filePath: path, directoryHint: .isDirectory) : nil
-            sparkle =
-                checkout
-                ? nil
-                : SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
-        }
-    #endif
+    init() {
+        let path = Bundle.main.object(forInfoDictionaryKey: "OpenNotchSourceDirectory") as? String ?? ""
+        let checkout = !path.isEmpty && FileManager.default.fileExists(atPath: path + "/scripts/update.sh")
+        sourceDirectory = checkout ? URL(filePath: path, directoryHint: .isDirectory) : nil
+    }
 
     /// "0.2.0", as releases are named.
     static var shortVersion: String {
@@ -56,7 +40,7 @@ final class Updater {
     }
 
     static let log = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask)[0]
-        .appending(path: "Logs/OpenNotch/update.log")
+        .appending(path: "Logs/NotchDeck/update.log")
 
     /// Rebuilds from the local checkout. On success the new build quits this one and takes its place.
     func updateFromSource() {
@@ -87,18 +71,10 @@ final class Updater {
         }
     }
 
-    /// Checks the appcast now and shows what Sparkle finds.
-    func checkForUpdates() {
-        #if !APP_STORE
-            if let sparkle {
-                sparkle.checkForUpdates(nil)
-                return
-            }
-        #endif
-        openReleases()
-    }
+    /// Without a checkout to rebuild, the upstream project's releases, to see what's new there.
+    func checkForUpdates() { openReleases() }
 
     func showLog() { NSWorkspace.shared.open(Self.log) }
 
-    func openReleases() { NSWorkspace.shared.open(Links.releases) }
+    func openReleases() { NSWorkspace.shared.open(Links.upstreamReleases) }
 }

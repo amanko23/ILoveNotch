@@ -29,7 +29,7 @@ public struct Note: Identifiable, Equatable, Sendable {
     public var isPinned = false
     /// The file's name in the notes folder; nil until the note is first saved.
     var fileName: String?
-    /// Whether the file is named after the title the way ILoveNotch names notes, so a new title
+    /// Whether the file is named after the title the way NotchDeck names notes, so a new title
     /// renames it. A file the user named, say in a Markdown app's folder, keeps its name.
     var followsTitle = true
     /// Front matter lines other apps wrote, kept as they were.
@@ -66,7 +66,7 @@ public struct Note: Identifiable, Equatable, Sendable {
         followsTitle = UUID(uuidString: base) != nil || Self.isNamed(base, after: title)
     }
 
-    /// Whether `base` is a file name ILoveNotch gives a note titled `title`: "Groceries", or
+    /// Whether `base` is a file name NotchDeck gives a note titled `title`: "Groceries", or
     /// "Groceries 2" next to another note of that title.
     static func isNamed(_ base: String, after title: String) -> Bool {
         guard let name = base.range(of: fileBase(for: title), options: [.anchored, .caseInsensitive]) else {

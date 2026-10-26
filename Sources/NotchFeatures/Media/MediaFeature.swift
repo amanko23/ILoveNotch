@@ -86,7 +86,7 @@ public final class MediaFeature: NotchFeature {
     private static let closedNotchKey = "media.showsInClosedNotch"
     /// How long a paused track stays in the closed notch.
     nonisolated static let linger: TimeInterval = 60
-    /// What macOS answered when asked whether ILoveNotch may script each player.
+    /// What macOS answered when asked whether NotchDeck may script each player.
     private var permissions: [ScriptedPlayer: ScriptedPlayer.Permission] = [:]
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private let adapter: MediaAdapter?
@@ -155,7 +155,7 @@ public final class MediaFeature: NotchFeature {
     /// Shuffle and repeat show when the player reports them, or when it can be asked.
     public var hasModes: Bool { nowPlaying?.shuffle != nil || nowPlaying?.repeatMode != nil || scriptedPlayer != nil }
 
-    /// The user said no to ILoveNotch scripting the app playing now.
+    /// The user said no to NotchDeck scripting the app playing now.
     public var automationDenied: Bool { scriptedPlayer.map { permissions[$0] == .denied } ?? false }
 
     // MARK: Controls
@@ -244,7 +244,7 @@ public final class MediaFeature: NotchFeature {
 
     // MARK: AppleScript
 
-    /// Runs `work` once the user lets ILoveNotch script `player`, asking the first time, then reads
+    /// Runs `work` once the user lets NotchDeck script `player`, asking the first time, then reads
     /// the player's state again.
     private func scripting(_ player: ScriptedPlayer, _ work: @escaping @MainActor (ScriptedPlayer) -> Void) {
         Task {
@@ -257,7 +257,7 @@ public final class MediaFeature: NotchFeature {
     }
 
     /// Reads shuffle, repeat, and the position from Music or Spotify, when the user has already let
-    /// ILoveNotch script it. It never asks by itself; pressing a control does.
+    /// NotchDeck script it. It never asks by itself; pressing a control does.
     private func refreshScripted() {
         guard let player = scriptedPlayer, phase != .stopped else {
             scripted = nil

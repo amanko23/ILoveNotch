@@ -6,7 +6,7 @@ import NotchCore
 /// activity. Everything in it comes from outside, so it's only ever displayed: the text is cleaned
 /// up and shortened, the symbol must be a real SF Symbol, and nothing in it is opened or run.
 public enum ShowInNotch {
-    public static let scheme = "ilovenotch"
+    public static let scheme = "notchdeck"
     public static let defaultSymbol = "bell.fill"
     /// Longer than the notch can show; the rest would only be room for abuse.
     static let maximumLength = 80
@@ -30,7 +30,7 @@ public enum ShowInNotch {
             duration: .milliseconds(Int(duration * 1000)))
     }
 
-    /// `ilovenotch://show?title=Build%20done&symbol=hammer.fill&seconds=5`, or nil for any other
+    /// `notchdeck://show?title=Build%20done&symbol=hammer.fill&seconds=5`, or nil for any other
     /// link.
     public static func activity(from url: URL) -> Activity? {
         guard url.scheme?.lowercased() == scheme, url.host()?.lowercased() == "show",

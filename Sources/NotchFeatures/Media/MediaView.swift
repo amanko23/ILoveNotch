@@ -338,7 +338,7 @@ struct MediaView: View {
         Button {
             NSWorkspace.shared.open(.privacySettings("Privacy_Automation"))
         } label: {
-            Text("Allow ILoveNotch to control \(player.name) in Privacy & Security › Automation")
+            Text("Allow NotchDeck to control \(player.name) in Privacy & Security › Automation")
                 .font(.caption2)
                 .foregroundStyle(.white.opacity(0.55))
                 .lineLimit(1)

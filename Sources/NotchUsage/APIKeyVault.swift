@@ -9,7 +9,7 @@ enum APIKeyVault {
     /// The variables a saved key can stand in for; nothing else reaches the keychain.
     static var names: Set<String> { Set(UsageFeature.apiKeyNames.values) }
 
-    private static let service = "ILoveNotch AI Usage"
+    private static let service = "NotchDeck AI Usage"
 
     /// Only the app itself uses its keychain items. Another process asking for one, such as a test
     /// runner, would make macOS ask the user.

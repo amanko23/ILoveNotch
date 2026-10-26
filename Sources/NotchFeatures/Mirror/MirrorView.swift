@@ -16,7 +16,7 @@ struct MirrorView: View {
         case .denied:
             FeatureUnavailableView(
                 symbol: "video.slash", title: "Camera access is off",
-                message: "Allow ILoveNotch in System Settings › Privacy & Security › Camera.",
+                message: "Allow NotchDeck in System Settings › Privacy & Security › Camera.",
                 action: ("Open Privacy Settings", { NSWorkspace.shared.open(.privacySettings("Privacy_Camera")) }))
         case .granted where mirror.cameraMissing:
             FeatureUnavailableView(

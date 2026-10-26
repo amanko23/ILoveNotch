@@ -8,7 +8,7 @@ import Testing
 /// On a private pasteboard, which macOS always lets an app read, never the user's own clipboard.
 @MainActor
 struct ClipboardTests {
-    private let pasteboard = NSPasteboard(name: .init("ILoveNotchTests.\(UUID().uuidString)"))
+    private let pasteboard = NSPasteboard(name: .init("NotchDeckTests.\(UUID().uuidString)"))
     private let folder = FileManager.default.temporaryDirectory.appending(path: "Clipboard-\(UUID().uuidString)")
     private let defaults = UserDefaults(suiteName: "Clipboard.\(UUID().uuidString)")!
 

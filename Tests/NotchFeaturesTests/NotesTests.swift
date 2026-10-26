@@ -100,7 +100,7 @@ struct NotesFeatureTests {
             notes.update(note.id, text: edited.replacingOccurrences(of: "Groceries", with: "Shopping") + "\nmore")
         }
         notes.phase = .background
-        #expect(files() == ["Meeting 2026-09-01.md", "Shopping.md", "Vault note.md"], "only ILoveNotch's names follow")
+        #expect(files() == ["Meeting 2026-09-01.md", "Shopping.md", "Vault note.md"], "only NotchDeck's names follow")
     }
 
     @Test func notesWithTheSameTitleGetTheirOwnFiles() {

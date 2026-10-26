@@ -24,8 +24,8 @@ struct ClipboardView: View {
                 action: (label: "Turn On", perform: clipboard.startRecording))
         } else if clipboard.access == .asks || clipboard.access == .denied {
             FeatureUnavailableView(
-                symbol: "lock", title: "Let ILoveNotch read what you copy",
-                message: "In System Settings › Privacy & Security › Paste from Other Apps, set ILoveNotch to "
+                symbol: "lock", title: "Let NotchDeck read what you copy",
+                message: "In System Settings › Privacy & Security › Paste from Other Apps, set NotchDeck to "
                     + "Always Allow. Until then macOS would ask each time.",
                 action: (
                     label: "Open Privacy Settings",

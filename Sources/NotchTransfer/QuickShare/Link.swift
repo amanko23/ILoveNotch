@@ -17,7 +17,7 @@ enum QuickShareError: Error, Equatable, Sendable {
     case unsupported
     /// The phone couldn't be reached.
     case unreachable
-    /// macOS doesn't let ILoveNotch use the local network.
+    /// macOS doesn't let NotchDeck use the local network.
     case localNetworkDenied
     /// The connection dropped or stalled.
     case lost
@@ -68,7 +68,7 @@ final class FrameLink: Sendable {
     let events: AsyncStream<LinkEvent>
     private let input: AsyncStream<LinkEvent>.Continuation
     private let connection: NWConnection
-    private let queue = DispatchQueue(label: "cafe.opennotch.quickshare", qos: .userInitiated)
+    private let queue = DispatchQueue(label: "com.amankothari.notchdeck.quickshare", qos: .userInitiated)
     /// Bytes handed to the network and not yet sent, and the most there have been at once.
     private let unsent = OSAllocatedUnfairLock(initialState: (now: 0, peak: 0))
 

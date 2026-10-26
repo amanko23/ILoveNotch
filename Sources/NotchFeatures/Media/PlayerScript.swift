@@ -28,7 +28,7 @@ public enum ScriptedPlayer: String, Sendable {
         case granted, notAsked, denied
     }
 
-    /// Whether ILoveNotch may script the app, asking with macOS's prompt when `ask` is set and the user
+    /// Whether NotchDeck may script the app, asking with macOS's prompt when `ask` is set and the user
     /// hasn't answered yet. Off the main thread: the prompt waits for the answer. The app is addressed
     /// by process, not bundle ID: asked about Spotify by bundle ID, macOS never answers (observed with
     /// Spotify 1.3.3 on macOS 26.6), and nothing is sent to an app that isn't running anyway.

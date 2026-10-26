@@ -3,12 +3,12 @@ import os
 
 /// Typed log channels and signposts. Stream them with:
 ///
-///     log stream --level debug --predicate 'subsystem == "cafe.opennotch.app"'
+///     log stream --level debug --predicate 'subsystem == "com.amankothari.notchdeck"'
 ///
 /// Signposts land in Instruments' Points of Interest track, where event handling and feature
 /// phase changes can be measured against the performance budgets.
 public enum Log {
-    public static let subsystem = "cafe.opennotch.app"
+    public static let subsystem = "com.amankothari.notchdeck"
 
     /// Presentation transitions.
     public static let state = Logger(subsystem: subsystem, category: "state")

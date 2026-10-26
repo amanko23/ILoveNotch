@@ -165,7 +165,7 @@ public final class TimerFeature: NotchFeature {
             // Named so `pmset -g assertions` says who's keeping the Mac awake.
             let status = IOPMAssertionCreateWithName(
                 kIOPMAssertPreventUserIdleDisplaySleep as CFString, IOPMAssertionLevel(kIOPMAssertionLevelOn),
-                "ILoveNotch: Keep Awake, in the Timer tab" as CFString, &assertion)
+                "NotchDeck: Keep Awake, in the Timer tab" as CFString, &assertion)
             guard status == kIOReturnSuccess else {
                 Log.features.error("Couldn't keep the Mac awake: \(status, privacy: .public)")
                 assertion = 0
