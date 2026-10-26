@@ -176,9 +176,10 @@ struct WeatherTests {
 
 struct HomeDataTests {
     @Test func theAgendaListsWhatsLeftDayByDay() {
-        let now = Date(timeIntervalSince1970: 1_790_000_000)
         let calendar = Calendar.current
-        let today = calendar.startOfDay(for: now)
+        // 2 pm local time, so every event below stays on today in any time zone.
+        let today = calendar.startOfDay(for: Date(timeIntervalSince1970: 1_790_000_000))
+        let now = today + 14 * 3600
         let tomorrow = calendar.date(byAdding: .day, value: 1, to: today)!
         let events = [
             AgendaEvent(id: "past", title: "Breakfast", start: now - 7200, end: now - 3600, isAllDay: false),

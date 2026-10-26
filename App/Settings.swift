@@ -461,7 +461,7 @@ private struct ThemePicker: View {
         let notch = UnevenRoundedRectangle(bottomLeadingRadius: 9, bottomTrailingRadius: 9, style: .continuous)
         return ZStack(alignment: .top) {
             LinearGradient(
-                colors: [AboutSettings.peach, AboutSettings.coral, .indigo], startPoint: .topLeading,
+                colors: [AboutSettings.dusk, AboutSettings.clay, .indigo], startPoint: .topLeading,
                 endPoint: .bottomTrailing)
             if option == .glass {
                 notch.fill(.white.opacity(0.28)).overlay(notch.stroke(.white.opacity(0.7), lineWidth: 0.75))

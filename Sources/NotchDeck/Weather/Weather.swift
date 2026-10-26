@@ -86,14 +86,21 @@ public struct WeatherCondition: Equatable, Sendable {
 /// Open-Meteo's free forecast API: no account and no key. Coordinates are rounded to a tenth of
 /// a degree (about 10 km) before they leave the Mac.
 enum OpenMeteo {
-    /// Open-Meteo's snake_case keys, read with `convertFromSnakeCase`: `temperature_2m` is
-    /// `temperature2m`.
+    /// Open-Meteo's snake_case keys, spelled out: `convertFromSnakeCase` would turn
+    /// `temperature_2m` into `temperature2M`.
     private struct Response: Decodable {
         struct Current: Decodable {
             var temperature2m: Double
             var apparentTemperature: Double
             var weatherCode: Int
             var isDay: Int
+
+            enum CodingKeys: String, CodingKey {
+                case temperature2m = "temperature_2m"
+                case apparentTemperature = "apparent_temperature"
+                case weatherCode = "weather_code"
+                case isDay = "is_day"
+            }
         }
 
         struct Daily: Decodable {
@@ -102,6 +109,14 @@ enum OpenMeteo {
             var temperature2mMax: [Double]
             var temperature2mMin: [Double]
             var precipitationProbabilityMax: [Int?]?
+
+            enum CodingKeys: String, CodingKey {
+                case time
+                case weatherCode = "weather_code"
+                case temperature2mMax = "temperature_2m_max"
+                case temperature2mMin = "temperature_2m_min"
+                case precipitationProbabilityMax = "precipitation_probability_max"
+            }
         }
 
         var current: Current
@@ -146,9 +161,7 @@ enum OpenMeteo {
     }
 
     static func decodeForecast(_ data: Data, place: String?, fahrenheit: Bool, now: Date = .now) throws -> Forecast {
-        let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
-        let response = try decoder.decode(Response.self, from: data)
+        let response = try JSONDecoder().decode(Response.self, from: data)
         let daily = response.daily
         let count = min(
             daily.time.count, daily.weatherCode.count, daily.temperature2mMax.count, daily.temperature2mMin.count)
