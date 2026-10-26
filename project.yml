@@ -16,6 +16,8 @@ settingGroups:
     # beside a real ILoveNotch without sharing settings, permissions, or updates. The project and
     # target keep their original OpenNotch names, which keeps upstream merges simple.
     PRODUCT_NAME: NotchDeck
+    # The app's Swift module keeps the target's name: "NotchDeck" is the package library's module.
+    PRODUCT_MODULE_NAME: OpenNotch
     PRODUCT_BUNDLE_IDENTIFIER: com.amankothari.notchdeck
     ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
     MARKETING_VERSION: 1.4.0 # the latest release, so builds from source say where they stand; releases set their own

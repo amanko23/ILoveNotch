@@ -50,7 +50,7 @@ private struct ClaudeTile: View {
         let busy = agents.active.count
         Tile(
             title: "Claude Code", symbol: "terminal.fill", tint: Deck.claude, badge: busy > 1 ? "\(busy)" : nil,
-            action: { home.show(.claude) }
+            home: home, opens: .claude
         ) {
             if agents.phase == .stopped {
                 Detail("Turn on Agents in Settings to follow your sessions.")
@@ -84,7 +84,7 @@ private struct FocusTile: View {
 
     var body: some View {
         let pomodoro = home.pomodoro
-        Tile(title: "Focus", symbol: "timer", tint: Deck.focus, action: { home.show(.focus) }) {
+        Tile(title: "Focus", symbol: "timer", tint: Deck.focus, home: home, opens: .focus) {
             HStack(alignment: .firstTextBaseline) {
                 PomodoroClock(pomodoro: pomodoro)
                     .font(.system(size: 22, weight: .semibold, design: .rounded))
@@ -110,7 +110,7 @@ private struct TodayTile: View {
     var body: some View {
         let agenda = home.agenda
         let today = Date.now.formatted(.dateTime.weekday(.abbreviated).day())
-        Tile(title: "Today · \(today)", symbol: "calendar", tint: Deck.calendar, action: { home.show(.calendar) }) {
+        Tile(title: "Today · \(today)", symbol: "calendar", tint: Deck.calendar, home: home, opens: .calendar) {
             switch agenda.access {
             case .granted:
                 let next = agenda.upcoming.prefix(2)
@@ -139,7 +139,7 @@ private struct SystemTile: View {
         let battery = monitor.battery
         Tile(
             title: battery.map { "System · \($0.percent)%" } ?? "System",
-            symbol: battery?.symbol ?? "cpu", tint: Deck.system, action: { home.show(.system) }
+            symbol: battery?.symbol ?? "cpu", tint: Deck.system, home: home, opens: .system
         ) {
             let top = monitor.energy.top
             if let first = top.first {
@@ -283,7 +283,9 @@ struct Tile<Content: View>: View {
     let symbol: String
     let tint: Color
     var badge: String?
-    let action: () -> Void
+    /// Home, and the peek this tile opens when clicked.
+    let home: HomeFeature
+    let opens: HomeFeature.Peek
     @ViewBuilder let content: Content
     @State private var hovering = false
 
@@ -314,11 +316,11 @@ struct Tile<Content: View>: View {
         )
         .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .onHover { hovering = $0 }
-        .onTapGesture(perform: action)
+        .onTapGesture { home.show(opens) }
         .animation(.easeOut(duration: 0.12), value: hovering)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(title)
-        .accessibilityAction(named: "Show more", action)
+        .accessibilityAction(named: "Show more") { home.show(opens) }
     }
 }
 
