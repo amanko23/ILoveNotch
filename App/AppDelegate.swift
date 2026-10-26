@@ -6,6 +6,7 @@ import NotchSurface
 import SwiftUI
 
 #if !APP_STORE
+    import NotchDeck
     import NotchMixer
     import NotchTransfer
     import NotchUsage
@@ -19,9 +20,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // volume (process taps, and a private call to tell whose helper plays), ship in the GitHub build.
         private let preferences = NotchPreferences(unavailable: [.usage, .agents, .sound])
     #else
-        private let preferences = NotchPreferences()
+        // NotchDeck keeps the row to what it's for (Home, Media, Calendar, Timer, Agents, System);
+        // every other tab starts on, in the drawer, a click away.
+        private let preferences = NotchPreferences(drawerByDefault: [
+            .sound, .shelf, .clipboard, .tasks, .notes, .shortcuts, .network, .mirror, .usage,
+        ])
         private let usage = UsageFeature()
-        private let agents = AgentsFeature()
+        private let agents: AgentsFeature
+        /// NotchDeck: Home, the dashboard; System, battery and energy; and the closed notch's pill.
+        private let home: HomeFeature
+        private let system: SystemFeature
+        private let pill = ClosedPillComposer()
         /// Quick Share with Android phones, part of the shelf.
         private let transfer = TransferFeature()
         /// The Sound tab: devices, and every app's volume.
@@ -56,6 +65,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let eventStore = EventStore()  // shared, and only created when Calendar or Tasks first needs it
         calendar = CalendarFeature(eventStore: eventStore)
         tasks = TasksFeature(eventStore: eventStore)
+        #if !APP_STORE
+            let agents = AgentsFeature()
+            let monitor = SystemMonitor()  // Home's System tile and the System tab share it
+            self.agents = agents
+            home = HomeFeature(eventStore: eventStore, agents: agents, monitor: monitor)
+            system = SystemFeature(monitor: monitor)
+        #endif
         super.init()
     }
     private var coordinator: PanelCoordinator?
@@ -75,13 +91,27 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         #if APP_STORE
             [media, shelf, clipboard, calendar, tasks, notes, shortcuts, timer, network, mirror]
         #else
-            [media, shelf, clipboard, calendar, tasks, notes, shortcuts, timer, network, mirror, usage, agents]
+            [
+                home, media, shelf, clipboard, calendar, tasks, notes, shortcuts, timer, network, mirror, usage, agents,
+                system,
+            ]
         #endif
     }
 
     private func tabView(for feature: FeatureID) -> AnyView {
         switch feature {
-        case .home, .system: return AnyView(EmptyView())
+        case .home:
+            #if APP_STORE
+                return AnyView(EmptyView())
+            #else
+                return AnyView(home.view)
+            #endif
+        case .system:
+            #if APP_STORE
+                return AnyView(EmptyView())
+            #else
+                return AnyView(system.view)
+            #endif
         case .media: return AnyView(media.view)
         case .sound:
             #if APP_STORE
@@ -144,7 +174,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         case .shortcuts: return section(shortcuts.settingsView)
         case .notes: return section(notes.settingsView)
         case .network: return section(network.settingsView)
-        case .timer, .mirror, .home, .system: return nil
+        case .timer, .mirror, .system: return nil
+        case .home:
+            #if APP_STORE
+                return nil
+            #else
+                return AnyView(home.settingsView)  // sections of its own
+            #endif
         case .usage:
             #if APP_STORE
                 return nil
@@ -175,6 +211,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 transfer.notchChanged(presentations, shelfEnabled: preferences.isEnabled(.shelf))
             #endif
             if !presentations.contains(where: { $0.openTab != nil }) { escapeKey.shortcut = nil }
+            #if !APP_STORE
+                // Closed everywhere: the next open lands on Home again.
+                if home.opensOnHome, !presentations.contains(where: { $0.openTab != nil }) {
+                    Task { @MainActor [weak self] in self?.coordinator?.broadcast(.setLastTab(.home)) }
+                }
+            #endif
         }
         notchKey.onPress = { [weak self, weak coordinator] in
             guard let self, coordinator?.toggleNotch() == true else { return }
@@ -188,7 +230,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         clipboard.onActivity = { [weak coordinator] in coordinator?.broadcast(.activity($0)) }
         clipboard.onPicked = { [weak coordinator] in coordinator?.dismissAll() }
         media.onActivity = { [weak coordinator] in coordinator?.broadcast(.activity($0)) }
-        media.onOngoing = { [weak coordinator] in coordinator?.setOngoing($0, for: .media) }
+        #if APP_STORE
+            media.onOngoing = { [weak coordinator] in coordinator?.setOngoing($0, for: .media) }
+        #else
+            // What's playing goes through NotchDeck's pill, which adds Pomodoro and Claude's progress.
+            media.onOngoing = { [pill] in pill.media = $0 }
+        #endif
         shelf.onActivity = { [weak coordinator] in coordinator?.broadcast(.activity($0)) }
         calendar.onActivity = { [weak coordinator] in coordinator?.broadcast(.activity($0)) }
         calendar.onOngoing = { [weak coordinator] in coordinator?.setOngoing($0, for: .calendar) }
@@ -208,6 +255,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             usage.openSettings = { [weak self] in self?.settings.show(.feature(.usage)) }
             agents.onActivity = { [weak coordinator] in coordinator?.broadcast(.activity($0)) }
             agents.onOngoing = { [weak coordinator] in coordinator?.setOngoing($0, for: .agents) }
+            home.pomodoro.onActivity = { [weak coordinator] in coordinator?.broadcast(.activity($0)) }
+            home.openTab = { [weak coordinator] in coordinator?.open($0) }
+            home.openSettings = { [weak self] in self?.settings.show(.feature(.home)) }
+            pill.onChange = { [weak self] in self?.showPill($0) }
             shelf.sendToAndroid = { [transfer] in transfer.send($0) }
             shelf.androidControl = AnyView(transfer.receiveControl)
             transfer.onActivity = { [weak coordinator] in coordinator?.broadcast(.activity($0)) }
@@ -231,6 +282,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         coordinator.start()
         self.coordinator = coordinator
+        #if !APP_STORE
+            if home.opensOnHome { coordinator.broadcast(.setLastTab(.home)) }
+            // Pomodoro and Claude's sessions feed the closed notch's pill as they change.
+            observeContinuously { [weak self] in
+                guard let self else { return }
+                pill.pomodoro = home.pomodoro.ongoingActivity
+                pill.claude = home.showsClaudeInClosedNotch ? ClaudeSummary(agents.sessions) : nil
+            }
+        #endif
         pendingMessages.forEach(showInNotch)
         pendingMessages = []
         observeContinuously { [weak self] in self?.updateSystemActivities() }
@@ -250,6 +310,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         statusItem = StatusItemController(updater: updater) { [weak self] in self?.settings.show($0) }
     }
+
+    #if !APP_STORE
+        /// NotchDeck's pill in the closed notch. Hovering it opens Home when the notch always opens
+        /// there; what's playing on its own opens Media otherwise. It rests in Home's place, or in
+        /// Media's when Home is off, so music still shows.
+        private func showPill(_ activity: Activity?) {
+            var activity = activity
+            let homeOn = preferences.isEnabled(.home)
+            if homeOn, home.opensOnHome { activity?.feature = .home }
+            let slot: FeatureID = homeOn && activity?.feature != .media ? .home : .media
+            coordinator?.setOngoing(slot == .media ? activity : nil, for: .media)
+            coordinator?.setOngoing(slot == .home ? activity : nil, for: .home)
+        }
+    #endif
 
     /// Show in Notch links from scripts and other apps: notchdeck://show?title=….
     func application(_ application: NSApplication, open urls: [URL]) {
