@@ -81,6 +81,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func tabView(for feature: FeatureID) -> AnyView {
         switch feature {
+        case .home, .system: return AnyView(EmptyView())
         case .media: return AnyView(media.view)
         case .sound:
             #if APP_STORE
@@ -143,7 +144,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         case .shortcuts: return section(shortcuts.settingsView)
         case .notes: return section(notes.settingsView)
         case .network: return section(network.settingsView)
-        case .timer, .mirror: return nil
+        case .timer, .mirror, .home, .system: return nil
         case .usage:
             #if APP_STORE
                 return nil

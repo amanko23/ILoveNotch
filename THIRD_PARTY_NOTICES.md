@@ -194,7 +194,8 @@ Copyright (c) 2020-2026 Paweł Kuna
 
 The icons in `Sources/NotchSurface/Resources/Icons` are Tabler Icons 3.48.0's
 outline and filled SVGs, unchanged, under their own names (a filled one ends in
-`-filled`).
+`-filled`). NotchDeck adds `home` and `cpu`, the same outline icons
+taken from the tabler-icons repository in October 2026.
 
 ```text
 MIT License

@@ -3,13 +3,17 @@ import Foundation
 
 /// A feature that can own the expanded notch.
 public enum FeatureID: String, CaseIterable, Hashable, Sendable {
+    // NotchDeck: Home, the dashboard, comes first; System (battery and energy) comes last.
+    case home
     case media, sound, shelf, clipboard, calendar, tasks, notes, shortcuts, timer, network, mirror, usage, agents
+    case system
 
     /// SF Symbol for the tab's page in Settings, beside System Settings' own symbols. The notch draws
     /// Tabler icons instead (NotchSurface's `FeatureID.icon`). Every name here exists on macOS 14.6,
     /// the oldest supported.
     public var symbol: String {
         switch self {
+        case .home: "house"
         case .media: "play.circle"
         case .sound: "speaker.wave.2"
         case .shelf: "tray.full"
@@ -23,6 +27,7 @@ public enum FeatureID: String, CaseIterable, Hashable, Sendable {
         case .mirror: "web.camera"
         case .usage: "gauge.with.needle"
         case .agents: "apple.terminal"
+        case .system: "battery.100percent.bolt"
         }
     }
 
@@ -34,6 +39,7 @@ public enum FeatureID: String, CaseIterable, Hashable, Sendable {
 
     public var title: String {
         switch self {
+        case .home: "Home"
         case .media: "Media"
         case .sound: "Sound"
         case .shelf: "Shelf"
@@ -47,6 +53,7 @@ public enum FeatureID: String, CaseIterable, Hashable, Sendable {
         case .mirror: "Mirror"
         case .usage: "AI Usage"
         case .agents: "Agents"
+        case .system: "System"
         }
     }
 }
@@ -69,10 +76,12 @@ public struct Activity: Hashable, Sendable {
     public var countdown: Date?
     /// A small encoded image shown in place of the symbol, such as the cover of what's playing.
     public var artwork: Data?
+    /// A second, smaller thing after the title, such as Claude's progress beside what's playing.
+    public var accessory: Accessory?
 
     public init(
         feature: FeatureID?, symbol: String, title: String, level: Double? = nil, duration: Duration,
-        countdown: Date? = nil, artwork: Data? = nil
+        countdown: Date? = nil, artwork: Data? = nil, accessory: Accessory? = nil
     ) {
         self.feature = feature
         self.symbol = symbol
@@ -81,6 +90,26 @@ public struct Activity: Hashable, Sendable {
         self.duration = duration
         self.countdown = countdown
         self.artwork = artwork
+        self.accessory = accessory
+    }
+
+    /// Drawn after an activity's title, past a thin divider: a ring filled to `progress`, or `symbol`
+    /// when there's no progress to show.
+    public struct Accessory: Hashable, Sendable {
+        public var symbol: String
+        /// 0...1, or nil for just the symbol.
+        public var progress: Double?
+        /// sRGB as 0xRRGGBB; white when nil.
+        public var tint: UInt32?
+        /// What VoiceOver reads for it.
+        public var label: String
+
+        public init(symbol: String, progress: Double? = nil, tint: UInt32? = nil, label: String) {
+            self.symbol = symbol
+            self.progress = progress
+            self.tint = tint
+            self.label = label
+        }
     }
 }
 
@@ -167,6 +196,8 @@ public enum NotchEvent: Hashable, Sendable {
     case setOngoing(Activity?)
     /// The enabled features changed, in tab order.
     case setTabs([FeatureID])
+    /// The tab the notch opens on next time, when it's enabled. Changes nothing on screen.
+    case setLastTab(FeatureID)
     case suspend(SuspendReason)
     case resume(SuspendReason)
     /// A deadline requested by an earlier `NotchEffect.schedule` fired.
@@ -260,6 +291,8 @@ public struct NotchState: Hashable, Sendable {
             }
         case (_, .setOngoing(let activity)):
             ongoing = activity
+        case (_, .setLastTab(let tab)) where tabs.contains(tab) && presentation.openTab == nil:
+            lastTab = tab
 
         // Suspending, attaching, and detaching win over everything else.
         case (_, .suspend(let reason)):

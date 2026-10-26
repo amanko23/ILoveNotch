@@ -142,6 +142,7 @@ extension SettingsSelection.Page {
         case .activities: ("bell.badge", .red)
         case .feature(let feature):
             switch feature {
+            case .home: (feature.symbol, .indigo)
             case .media: ("play", .pink)
             case .sound: (feature.symbol, .red)
             case .shelf: (feature.symbol, .blue)
@@ -155,6 +156,7 @@ extension SettingsSelection.Page {
             case .mirror: (feature.symbol, .green)
             case .usage: (feature.symbol, .purple)
             case .agents: (feature.symbol, .gray)
+            case .system: ("bolt", .green)
             }
         }
     }
@@ -169,6 +171,7 @@ extension SettingsSelection.Page {
         case .activities: "What the closed notch shows for a moment when something changes."
         case .feature(let feature):
             switch feature {
+            case .home: "Your dashboard: Claude Code, Pomodoro, today, battery, weather, and quick switches."
             case .media: "What's playing in any app, with artwork, controls, and a waveform."
             case .sound: "Your speakers and microphone, and every app's volume on its own fader."
             case .shelf: "Files you drop on the notch, at hand to drag out, preview, or share."
@@ -181,7 +184,8 @@ extension SettingsSelection.Page {
             case .network: "Your download and upload speed, and how much you've used."
             case .mirror: "Your camera, on only while its tab is open."
             case .usage: "How much of each AI coding plan you've used."
-            case .agents: "When Claude Code or Codex needs you or finishes, in the closed notch."
+            case .agents: "Claude Code and Codex sessions: progress, when one needs you, and when it's done."
+            case .system: "Battery health, the apps using the most energy, and your accessories' batteries."
             }
         }
     }

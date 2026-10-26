@@ -565,6 +565,9 @@ struct NotchView: View {
             .font(.system(size: 12, weight: .medium))
             .monospacedDigit()  // numbers that change in place keep their width
             .lineLimit(1)
+            if let accessory = activity.accessory {
+                AccessoryMark(accessory: accessory)
+            }
         }
     }
 
@@ -595,6 +598,44 @@ struct NotchView: View {
         .padding(.horizontal, 16)
         .frame(height: metrics.notch == nil ? metrics.housing.height : NotchMetrics.meterDepth)
         .padding(.top, metrics.notch == nil ? 0 : metrics.housing.height)
+    }
+}
+
+/// An activity's accessory after its title: a thin divider, then a ring filled to its progress, or
+/// its symbol when there's none. `NotchMetrics.accessoryWidth` is its width with the gap before it.
+private struct AccessoryMark: View {
+    let accessory: Activity.Accessory
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Capsule().fill(.white.opacity(0.25)).frame(width: 1, height: 12)
+            Group {
+                if let progress = accessory.progress {
+                    ZStack {
+                        Circle().stroke(.white.opacity(0.22), lineWidth: 2)
+                        Circle()
+                            .trim(from: 0, to: min(max(progress, 0.02), 1))
+                            .stroke(tint, style: StrokeStyle(lineWidth: 2, lineCap: .round))
+                            .rotationEffect(.degrees(-90))
+                    }
+                    .padding(1)
+                } else {
+                    Image(systemName: accessory.symbol)
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(tint)
+                }
+            }
+            .frame(width: NotchMetrics.accessorySide, height: NotchMetrics.accessorySide)
+        }
+        .accessibilityElement()
+        .accessibilityLabel(accessory.label)
+    }
+
+    private var tint: Color {
+        guard let rgb = accessory.tint else { return .white }
+        return Color(
+            red: Double((rgb >> 16) & 0xFF) / 255, green: Double((rgb >> 8) & 0xFF) / 255,
+            blue: Double(rgb & 0xFF) / 255)
     }
 }
 

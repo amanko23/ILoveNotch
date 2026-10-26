@@ -216,11 +216,16 @@ public final class NotchPreferences {
     /// Features this build can offer, in tab order. The App Store edition leaves out the ones the
     /// App Sandbox can't run.
     public let available: [FeatureID]
+    /// Features that start in the drawer instead of the tab row, on, until the user moves them.
+    public let drawerByDefault: Set<FeatureID>
 
-    public init(defaults: UserDefaults = .standard, unavailable: Set<FeatureID> = []) {
+    public init(
+        defaults: UserDefaults = .standard, unavailable: Set<FeatureID> = [], drawerByDefault: Set<FeatureID> = []
+    ) {
         self.defaults = defaults
         let available = FeatureID.allCases.filter { !unavailable.contains($0) }
         self.available = available
+        self.drawerByDefault = drawerByDefault
         func features(_ key: String) -> Set<FeatureID> {
             Set((defaults.stringArray(forKey: key) ?? []).compactMap(FeatureID.init(rawValue:)))
         }
@@ -235,7 +240,8 @@ public final class NotchPreferences {
         let stored = (defaults.stringArray(forKey: Key.tabOrder) ?? []).compactMap(FeatureID.init(rawValue:))
             .filter { available.contains($0) && placed.insert($0).inserted }
         tabOrder = stored + available.filter { !placed.contains($0) }
-        drawerOnly = features(Key.drawerOnly)
+        // Nothing stored yet means a first launch: the default drawer.
+        drawerOnly = defaults.object(forKey: Key.drawerOnly) == nil ? drawerByDefault : features(Key.drawerOnly)
         showOnAllDisplays = defaults.bool(forKey: Key.showOnAllDisplays)
         pillDisplays = Set(defaults.stringArray(forKey: Key.pillDisplays) ?? [])
         animationStyle = defaults.string(forKey: Key.animationStyle).flatMap(NotchAnimationStyle.init) ?? .spring
@@ -318,7 +324,7 @@ public final class NotchPreferences {
     public func reset() {
         disabledFeatures = Self.offByDefault
         tabOrder = available
-        drawerOnly = []
+        drawerOnly = drawerByDefault
         showOnAllDisplays = false
         pillDisplays = []
         animationStyle = .spring

@@ -110,7 +110,8 @@ public final class PanelCoordinator {
             ongoing[index].activity = activity
         } else {
             ongoing.removeAll { $0.feature == feature }
-            let underneath: Set<FeatureID> = [.network, .media]
+            // NotchDeck's combined pill (what's playing, Pomodoro, Claude's progress) is in `.home`.
+            let underneath: Set<FeatureID> = [.network, .media, .home]
             if let activity {
                 ongoing.insert((feature, activity), at: underneath.contains(feature) ? 0 : ongoing.count)
             }

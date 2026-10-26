@@ -44,6 +44,7 @@ extension FeatureID {
     /// `symbol`, an SF Symbol, beside System Settings' own.
     var icon: String {
         switch self {
+        case .home: "home"
         case .media: "music"
         case .sound: "volume"
         case .shelf: "inbox"
@@ -57,6 +58,7 @@ extension FeatureID {
         case .mirror: "device-computer-camera"
         case .usage: "gauge"
         case .agents: "terminal-2"
+        case .system: "cpu"
         }
     }
 }

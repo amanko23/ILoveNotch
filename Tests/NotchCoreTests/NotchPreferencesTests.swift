@@ -56,8 +56,9 @@ struct NotchPreferencesTests {
         #expect(preferences.tabs.first == .timer)
         preferences.setEnabled(.shelf, false)
         preferences.place(.notes, at: 1)
-        #expect(preferences.tabs.prefix(3) == [.timer, .notes, .media])
-        #expect(preferences.tabOrder.prefix(5) == [.timer, .notes, .media, .sound, .shelf], "the hidden shelf stayed")
+        #expect(preferences.tabs.prefix(3) == [.timer, .notes, .home])
+        let order: [FeatureID] = [.timer, .notes, .home, .media, .sound, .shelf]
+        #expect(preferences.tabOrder.prefix(6) == order[...], "the hidden shelf stayed")
         preferences.place(.shelf, at: preferences.tabs.count)
         #expect(preferences.tabs.last == .shelf && preferences.isEnabled(.shelf), "placing a hidden tab shows it")
         #expect(NotchPreferences(defaults: defaults).tabs == preferences.tabs, "and the order persists")

@@ -9,7 +9,8 @@ import SwiftUI
 public final class EventStore {
     public init() {}
 
-    private(set) lazy var store = EKEventStore()
+    // Public for NotchDeck's Home, which shows the next few events.
+    public private(set) lazy var store = EKEventStore()
 }
 
 /// Where EventKit access stands for one kind of data.
