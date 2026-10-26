@@ -14,7 +14,9 @@ struct PeekView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 8) {
-                Button { home.peek = nil } label: {
+                Button {
+                    home.peek = nil
+                } label: {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 10, weight: .bold))
                         .frame(width: 22, height: 22)
@@ -106,13 +108,14 @@ private struct ClaudePeek: View {
             if session.app != nil {
                 let tint = waiting ? Color.orange : .white.opacity(0.15)
                 PillButton("Go", tint: tint, foreground: waiting ? .black : .white) { agents.open(session) }
-                .help("Go to its terminal")
+                    .help("Go to its terminal")
             }
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 5)
         .background(
-            waiting ? Color.orange.opacity(0.14) : .white.opacity(0.05), in: RoundedRectangle(cornerRadius: 9))
+            waiting ? Color.orange.opacity(0.14) : .white.opacity(0.05), in: RoundedRectangle(cornerRadius: 9)
+        )
         .accessibilityElement(children: .combine)
     }
 }

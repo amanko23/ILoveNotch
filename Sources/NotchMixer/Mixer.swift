@@ -542,7 +542,8 @@ public final class Mixer {
         var inputs: [SoundDevice] = []
         for device in AudioObjectID.system.readList(kAudioHardwarePropertyDevices) {
             // The mixer's and the waveform's own aggregate devices, which only NotchDeck sees.
-            guard let uid = device.readString(kAudioDevicePropertyDeviceUID), !uid.hasPrefix("com.amankothari.notchdeck."),
+            guard let uid = device.readString(kAudioDevicePropertyDeviceUID),
+                !uid.hasPrefix("com.amankothari.notchdeck."),
                 device.read(kAudioDevicePropertyIsHidden, default: UInt32(0)) == 0
             else { continue }
             let name = device.readString(kAudioObjectPropertyName) ?? uid

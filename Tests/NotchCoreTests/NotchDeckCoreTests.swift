@@ -33,8 +33,9 @@ struct NotchDeckCoreTests {
         let meeting = Activity(feature: .calendar, symbol: "video.fill", title: "Standup", duration: .zero)
         let hovered = after(.show, .setOngoing(meeting), .pointerEntered, .setLastTab(.home))
         #expect(hovered.presentation == .hoverArmed && hovered.lastTab == .calendar)
-        #expect(after(.show, .setOngoing(meeting), .pointerEntered, .setLastTab(.home), .clicked).presentation
-            == .expanded(tab: .calendar))
+        #expect(
+            after(.show, .setOngoing(meeting), .pointerEntered, .setLastTab(.home), .clicked).presentation
+                == .expanded(tab: .calendar))
     }
 
     @Test func anAccessoryTravelsWithItsActivity() {

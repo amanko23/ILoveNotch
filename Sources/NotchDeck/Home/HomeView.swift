@@ -310,7 +310,8 @@ struct Tile<Content: View>: View {
         .padding(.vertical, 8)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(
-            RoundedRectangle(cornerRadius: 12, style: .continuous).fill(.white.opacity(hovering ? 0.11 : 0.07)))
+            RoundedRectangle(cornerRadius: 12, style: .continuous).fill(.white.opacity(hovering ? 0.11 : 0.07))
+        )
         .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .onHover { hovering = $0 }
         .onTapGesture(perform: action)
