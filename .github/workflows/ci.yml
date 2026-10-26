@@ -148,13 +148,19 @@ jobs:
         run: scripts/publish-ci-logs.sh app
 
       # NotchDeck: a green build of notchdeck becomes the "notchdeck-latest" pre-release, so the app
-      # installs without Xcode. Apple silicon, ad-hoc signed.
+      # installs without Xcode. Universal (Intel and Apple silicon), ad-hoc signed.
       - name: Publish the app
         if: github.event_name == 'push' && steps.build.outcome == 'success' && steps.licenses.outcome == 'success'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          ditto -c -k --keepParent .build/xcode/Build/Products/Release/NotchDeck.app NotchDeck.zip
+          set -o pipefail
+          xcodebuild -project OpenNotch.xcodeproj -scheme OpenNotch -configuration Release \
+            -destination 'generic/platform=macOS' -derivedDataPath .build/universal \
+            ONLY_ACTIVE_ARCH=NO ARCHS='arm64 x86_64' -quiet build 2>&1 | tee universal.log
+          app=.build/universal/Build/Products/Release/NotchDeck.app
+          lipo -archs "$app/Contents/MacOS/NotchDeck" | tee -a universal.log
+          ditto -c -k --keepParent "$app" NotchDeck.zip
           gh release delete notchdeck-latest --yes --cleanup-tag || true
           gh release create notchdeck-latest NotchDeck.zip --target "$GITHUB_SHA" --prerelease \
             --title "NotchDeck (latest build)" \
