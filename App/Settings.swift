@@ -414,7 +414,10 @@ private struct AppearancePage: View {
     }
 
     private var themeNote: String {
-        guard Self.glassAvailable else { return "Glass needs macOS 26 or later." }
+        guard Self.glassAvailable else {
+            return "Viorim Glass blurs your desktop through the open notch in Gunmetal, on any macOS. Glass needs "
+                + "macOS 26 or later."
+        }
         let note =
             "Glass shows your desktop through the open notch, the way macOS draws Control Center. Closed, the notch "
             + "stays black to hide in the camera housing."
@@ -465,6 +468,15 @@ private struct ThemePicker: View {
                 endPoint: .bottomTrailing)
             if option == .glass {
                 notch.fill(.white.opacity(0.28)).overlay(notch.stroke(.white.opacity(0.7), lineWidth: 0.75))
+                    .frame(width: 58, height: 26)
+            } else if option == .viorim {
+                // Gunmetal glass with the steel light and rim, as the Viorim OS kit draws it.
+                notch.fill(Color(red: 27 / 255, green: 31 / 255, blue: 35 / 255).opacity(0.72))
+                    .overlay(notch.fill(RadialGradient(
+                        colors: [Color(red: 127 / 255, green: 162 / 255, blue: 201 / 255).opacity(0.45), .clear],
+                        center: .topLeading, startRadius: 0, endRadius: 40)))
+                    .overlay(notch.stroke(Color(red: 157 / 255, green: 178 / 255, blue: 203 / 255).opacity(0.5),
+                        lineWidth: 0.75))
                     .frame(width: 58, height: 26)
             } else {
                 notch.fill(.black).frame(width: 58, height: 26)

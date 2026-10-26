@@ -11,16 +11,19 @@ struct HomeView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
+        // Going deeper pushes from the right and Back reverses it, on the kit's smooth spring.
         Group {
             if let peek = home.peek {
-                PeekView(home: home, peek: peek)
-                    .transition(.opacity.combined(with: .scale(scale: 0.97)))
+                PeekView(home: home, peek: peek).transition(reduceMotion ? .opacity : Self.deeper)
             } else {
-                dashboard.transition(.opacity)
+                dashboard.transition(reduceMotion ? .opacity : Self.back)
             }
         }
-        .animation(reduceMotion ? nil : .spring(response: 0.3, dampingFraction: 0.86), value: home.peek)
+        .animation(reduceMotion ? Viorim.reduced : Viorim.smooth, value: home.peek)
     }
+
+    private static let deeper = AnyTransition.move(edge: .trailing).combined(with: .opacity)
+    private static let back = AnyTransition.move(edge: .leading).combined(with: .opacity)
 
     private var dashboard: some View {
         VStack(spacing: 6) {
@@ -49,24 +52,26 @@ private struct ClaudeTile: View {
         let agents = home.agents
         let busy = agents.active.count
         Tile(
-            title: "Claude Code", symbol: "terminal.fill", tint: Deck.claude, badge: busy > 1 ? "\(busy)" : nil,
-            home: home, opens: .claude
+            title: "Claude Code", symbol: "terminal", tint: Deck.claude, badge: busy > 1 ? "\(busy)" : nil,
+            hero: true, home: home, opens: .claude
         ) {
             if agents.phase == .stopped {
                 Detail("Turn on Agents in Settings to follow your sessions.")
             } else if !agents.connected.contains(.claude) {
                 Detail("Connect Claude Code to follow its sessions here.")
                 if agents.available.contains(.claude) {
-                    PillButton("Connect") { agents.connect(.claude) }
+                    PillButton("Connect", prominent: true) { agents.connect(.claude) }
                 }
             } else if let session = HomeFeature.featured(agents.sessions) {
                 let waiting = session.state == .waiting
-                Text(Deck.headline(session))
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(waiting ? Color.orange : .white)
-                    .lineLimit(1)
+                HStack(spacing: 6) {
+                    StatusChip(Deck.stateWord(session), tone: Deck.tone(session))
+                    Text(session.project).font(Viorim.body).foregroundStyle(Viorim.ink).lineLimit(1)
+                    Spacer(minLength: 0)
+                    if session.state == .working || session.state == .compacting { WorkingDot() }
+                }
                 if let progress = session.progress, session.state != .done {
-                    AgentProgressBar(progress: progress, tint: waiting ? .orange : Deck.claude)
+                    AgentProgressBar(progress: progress, tint: waiting ? Viorim.warning : Viorim.accent)
                 }
                 TimelineView(.everyMinute) { context in
                     Detail(Deck.detail(session, now: context.date))
@@ -87,7 +92,8 @@ private struct FocusTile: View {
         Tile(title: "Focus", symbol: "timer", tint: Deck.focus, home: home, opens: .focus) {
             HStack(alignment: .firstTextBaseline) {
                 PomodoroClock(pomodoro: pomodoro)
-                    .font(.system(size: 22, weight: .semibold, design: .rounded))
+                    .font(Viorim.metric(26))
+                    .foregroundStyle(Viorim.ink)
                 Spacer(minLength: 4)
                 RoundDots(pomodoro: pomodoro)
             }
@@ -95,9 +101,10 @@ private struct FocusTile: View {
             HStack(spacing: 6) {
                 Detail(Deck.phaseLine(pomodoro))
                 Spacer(minLength: 0)
-                PillButton(pomodoro.isRunning ? "Pause" : pomodoro.isActive ? "Resume" : "Start") {
-                    pomodoro.toggle()
-                }
+                PillButton(
+                    pomodoro.isRunning ? "Pause" : pomodoro.isActive ? "Resume" : "Start",
+                    prominent: !pomodoro.isRunning
+                ) { pomodoro.toggle() }
             }
         }
     }
@@ -121,7 +128,7 @@ private struct TodayTile: View {
                 }
             case .notDetermined:
                 Detail("See what's next on your calendar.")
-                PillButton("Continue") { agenda.requestAccess() }
+                PillButton("Continue", prominent: true) { agenda.requestAccess() }
             case .denied:
                 Detail("Calendar access is off.")
                 PillButton("Open Settings") { agenda.openPrivacySettings() }
@@ -143,9 +150,11 @@ private struct SystemTile: View {
         ) {
             let top = monitor.energy.top
             if let first = top.first {
-                Text("Top energy: \(first.name) \(first.wattsText)")
-                    .font(.system(size: 11, weight: .medium))
-                    .lineLimit(1)
+                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                    Text(first.name).font(Viorim.body).foregroundStyle(Viorim.ink).lineLimit(1)
+                    Spacer(minLength: 2)
+                    Text(first.wattsText).font(Viorim.metric(15)).monospacedDigit().foregroundStyle(Viorim.ink)
+                }
                 if top.count > 1 {
                     Detail(top.dropFirst().prefix(2).map { "\($0.name) \($0.wattsText)" }.joined(separator: " · "))
                 }
@@ -169,7 +178,7 @@ private struct HomeFooter: View {
             Spacer(minLength: 4)
             appearance
             Spacer(minLength: 4)
-            FooterButton(symbol: "person.2.fill", title: "Switch User", tint: .white) { home.show(.user) }
+            FooterButton(symbol: "person.2", title: "Switch User", tint: Viorim.ink2) { home.show(.user) }
                 .help("Lock and switch to another user")
         }
         .frame(height: 22)
@@ -194,14 +203,14 @@ private struct HomeFooter: View {
     @ViewBuilder private var appearance: some View {
         let appearance = home.appearance
         if appearance.failure != nil {
-            FooterButton(symbol: "exclamationmark.triangle.fill", title: "Allow", tint: .orange) {
+            FooterButton(symbol: "exclamationmark.triangle", title: "Allow", tint: Viorim.warning) {
                 appearance.openAutomationSettings()
             }
             .help(appearance.failure ?? "")
         } else {
             FooterButton(
-                symbol: appearance.isDark ? "moon.fill" : "sun.max.fill", title: appearance.isDark ? "Dark" : "Light",
-                tint: appearance.isDark ? Deck.focus : Deck.weather
+                symbol: appearance.isDark ? "moon" : "sun.max", title: appearance.isDark ? "Dark" : "Light",
+                tint: Viorim.ink2
             ) { appearance.toggle() }
             .help(appearance.isDark ? "Switch your Mac to light appearance" : "Switch your Mac to dark appearance")
             .disabled(appearance.isSwitching)
@@ -211,13 +220,23 @@ private struct HomeFooter: View {
 
 // MARK: Building blocks
 
-/// NotchDeck's tints and the words its tiles use.
+/// The words Home's tiles use, and their tints: the Viorim kit's calm roles, one accent.
 enum Deck {
-    static let claude = Color(red: 0.85, green: 0.47, blue: 0.34)
-    static let focus = Color(red: 0.79, green: 0.64, blue: 1)
-    static let calendar = Color(red: 0.39, green: 0.66, blue: 1)
-    static let system = Color(red: 1, green: 0.84, blue: 0.04)
-    static let weather = Color(red: 1, green: 0.8, blue: 0.3)
+    static let claude = Viorim.accent
+    static let focus = Viorim.accent
+    static let calendar = Viorim.accent
+    static let system = Viorim.ink2
+    static let weather = Viorim.ink2
+
+    /// A session's state as a status chip's tone.
+    static func tone(_ session: AgentSession) -> StatusChip.Tone {
+        switch session.state {
+        case .waiting: .warning
+        case .working, .compacting: .info
+        case .idle: .neutral
+        case .done: .success
+        }
+    }
 
     /// "Working · notchdeck".
     static func headline(_ session: AgentSession) -> String { "\(stateWord(session)) · \(session.project)" }
@@ -278,11 +297,15 @@ enum Deck {
 
 /// A dashboard tile: a titled, rounded card that opens its peek when clicked. Buttons inside it
 /// still work on their own.
+///
+/// Drawn as the Viorim kit's raised surface on the notch's glass, with a hairline rim. The one hero
+/// tile (Claude Code) carries the kit's steel light: a glow in its top-left corner and a lit edge.
 struct Tile<Content: View>: View {
     let title: String
     let symbol: String
     let tint: Color
     var badge: String?
+    var hero = false
     /// Home, and the peek this tile opens when clicked.
     let home: HomeFeature
     let opens: HomeFeature.Peek
@@ -290,34 +313,49 @@ struct Tile<Content: View>: View {
     @State private var hovering = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        let shape = RoundedRectangle(cornerRadius: Viorim.radiusTile, style: .continuous)
+        VStack(alignment: .leading, spacing: 5) {
             HStack(spacing: 5) {
                 Image(systemName: symbol)
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(tint)
-                Text(title).font(.system(size: 12, weight: .semibold)).lineLimit(1)
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundStyle(hero ? Viorim.accent : Viorim.ink3)
+                Text(title.uppercased())
+                    .font(Viorim.label())
+                    .tracking(0.6)
+                    .foregroundStyle(Viorim.ink2)
+                    .lineLimit(1)
                 Spacer(minLength: 0)
                 if let badge {
                     Text(badge)
-                        .font(.system(size: 10, weight: .bold))
-                        .monospacedDigit()
+                        .font(Viorim.label(9))
+                        .foregroundStyle(Viorim.ink)
                         .padding(.horizontal, 5)
-                        .background(tint.opacity(0.3), in: Capsule())
+                        .background(Viorim.highlight, in: Capsule())
                 }
             }
-            VStack(alignment: .leading, spacing: 3) { content }
+            VStack(alignment: .leading, spacing: 4) { content }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 8)
+        .padding(.horizontal, 11)
+        .padding(.vertical, 9)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .background(
-            RoundedRectangle(cornerRadius: 12, style: .continuous).fill(.white.opacity(hovering ? 0.11 : 0.07))
-        )
-        .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .background {
+            ZStack {
+                shape.fill(Viorim.surfaceRaised.opacity(hovering ? 0.72 : 0.55))
+                if hero {
+                    RadialGradient(
+                        colors: [Viorim.heroTint, .clear], center: .topLeading, startRadius: 0, endRadius: 170
+                    )
+                    .clipShape(shape)
+                }
+                shape.strokeBorder(hero ? Viorim.heroRim : Viorim.glassRim, lineWidth: 1)
+            }
+            .shadow(color: hero ? Viorim.glowSteel.opacity(0.5) : .clear, radius: 14)
+        }
+        .contentShape(shape)
         .onHover { hovering = $0 }
         .onTapGesture { home.show(opens) }
-        .animation(.easeOut(duration: 0.12), value: hovering)
+        .animation(.easeInOut(duration: 0.2), value: hovering)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(title)
         .accessibilityAction(named: "Show more") { home.show(opens) }
@@ -332,23 +370,27 @@ struct Detail: View {
 
     var body: some View {
         Text(text)
-            .font(.system(size: 11))
-            .foregroundStyle(.white.opacity(0.6))
+            .font(Viorim.footnote)
+            .foregroundStyle(Viorim.ink2)
             .lineLimit(1)
     }
 }
 
-/// A small capsule button, as the notch's other tabs use.
+/// A small capsule button. `prominent` is the Viorim kit's Frost capsule, kept for the one primary
+/// action in view; the rest sit on the raised surface with a hairline.
 struct PillButton: View {
     let title: String
     let tint: Color
     let foreground: Color
     let action: () -> Void
 
-    init(
-        _ title: String, tint: Color = .white.opacity(0.15), foreground: Color = .white,
-        action: @escaping () -> Void
-    ) {
+    init(_ title: String, prominent: Bool = false, action: @escaping () -> Void) {
+        self.init(
+            title, tint: prominent ? Viorim.action : Viorim.surfaceRaised,
+            foreground: prominent ? Viorim.onAction : Viorim.ink, action: action)
+    }
+
+    init(_ title: String, tint: Color, foreground: Color, action: @escaping () -> Void) {
         self.title = title
         self.tint = tint
         self.foreground = foreground
@@ -357,13 +399,14 @@ struct PillButton: View {
 
     var body: some View {
         Button(title, action: action)
-            .buttonStyle(.plain)
+            .buttonStyle(PressStyle())
             .font(.system(size: 10.5, weight: .semibold))
             .foregroundStyle(foreground)
             .lineLimit(1)
             .padding(.horizontal, 9)
             .padding(.vertical, 3)
             .background(tint, in: Capsule())
+            .overlay(Capsule().strokeBorder(Viorim.glassRim, lineWidth: 1))
             .fixedSize()
     }
 }
@@ -384,10 +427,11 @@ private struct FooterButton: View {
             }
             .padding(.horizontal, 6)
             .frame(height: 22)
-            .background(.white.opacity(hovering ? 0.09 : 0), in: RoundedRectangle(cornerRadius: 7))
+            .foregroundStyle(Viorim.ink)
+            .background(Viorim.surfaceRaised.opacity(hovering ? 0.6 : 0), in: Capsule())
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PressStyle())
         .onHover { hovering = $0 }
     }
 }
@@ -395,6 +439,7 @@ private struct FooterButton: View {
 /// The time left in the Pomodoro session: counting down live while it runs.
 struct PomodoroClock: View {
     let pomodoro: Pomodoro
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         Group {
@@ -402,7 +447,10 @@ struct PomodoroClock: View {
                 let now = Date.now
                 Text(timerInterval: now...max(endsAt, now), countsDown: true)
             } else {
+                // Changed digits roll (snappy); Reduce Motion changes them at once.
                 Text(Deck.clock(pomodoro.remaining))
+                    .contentTransition(reduceMotion ? .identity : .numericText(countsDown: true))
+                    .animation(reduceMotion ? nil : Viorim.snappy, value: pomodoro.remaining)
             }
         }
         .monospacedDigit()
@@ -418,7 +466,7 @@ private struct RoundDots: View {
         HStack(spacing: 3) {
             ForEach(0..<pomodoro.plan.rounds, id: \.self) { index in
                 Circle()
-                    .fill(index < pomodoro.finishedRounds ? Deck.focus : .white.opacity(0.22))
+                    .fill(index < pomodoro.finishedRounds ? Viorim.accent : Viorim.separator)
                     .frame(width: 5, height: 5)
             }
         }
@@ -435,11 +483,11 @@ struct EventRow: View {
         HStack(spacing: 6) {
             Capsule().fill(event.color?.color ?? Deck.calendar).frame(width: 3, height: 12)
             Text(event.when())
-                .font(.system(size: 11))
+                .font(Viorim.footnote)
                 .monospacedDigit()
-                .foregroundStyle(.white.opacity(0.6))
+                .foregroundStyle(Viorim.ink2)
                 .frame(width: 44, alignment: .leading)
-            Text(event.title).font(.system(size: 11)).lineLimit(1)
+            Text(event.title).font(Viorim.footnote).foregroundStyle(Viorim.ink).lineLimit(1)
         }
         .accessibilityElement(children: .combine)
     }

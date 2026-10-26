@@ -38,6 +38,15 @@ struct NotchDeckCoreTests {
                 == .expanded(tab: .calendar))
     }
 
+    @MainActor
+    @Test func theViorimLookIsAThemeAndAMotion() throws {
+        #expect(NotchTheme.viorim.title == "Viorim Glass" && NotchAnimationStyle.measured.title == "Measured")
+        let defaults = try #require(UserDefaults(suiteName: "NotchDeckCore.\(UUID().uuidString)"))
+        defaults.register(defaults: ["theme": "viorim", "animationStyle": "measured"])
+        let preferences = NotchPreferences(defaults: defaults)
+        #expect(preferences.theme == .viorim && preferences.animationStyle == .measured, "NotchDeck's defaults")
+    }
+
     @Test func anAccessoryTravelsWithItsActivity() {
         let ring = Activity.Accessory(symbol: "terminal.fill", progress: 0.5, tint: 0xD97757, label: "Claude, 3 of 6")
         let song = Activity(feature: .media, symbol: "music.note", title: "Song", duration: .zero, accessory: ring)

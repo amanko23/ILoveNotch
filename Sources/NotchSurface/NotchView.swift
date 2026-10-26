@@ -154,9 +154,14 @@ struct NotchView: View {
     /// black to hide in the camera housing; Reduce Transparency and Increase Contrast keep it black,
     /// where text needs a solid backing most.
     private func showsGlass(_ presentation: NotchPresentationState) -> Bool {
-        guard #available(macOS 26, *) else { return false }
-        return presentation.openTab != nil && preferences.theme == .glass && !reduceTransparency
-            && contrast != .increased
+        guard presentation.openTab != nil, !reduceTransparency, contrast != .increased else { return false }
+        switch preferences.theme {
+        case .black: return false
+        case .viorim: return true  // a tinted blur on every macOS; Liquid Glass on top on 26
+        case .glass:
+            guard #available(macOS 26, *) else { return false }
+            return true
+        }
     }
 
     /// Black, or glass that materializes as the black fades out. The camera housing stays black over
@@ -170,7 +175,9 @@ struct NotchView: View {
     @ViewBuilder
     private func fill(_ outline: NotchShape, glass: Bool) -> some View {
         ZStack(alignment: .top) {
-            if #available(macOS 26, *), preferences.theme == .glass {
+            if preferences.theme == .viorim, glass {
+                viorimGlass(outline)
+            } else if #available(macOS 26, *), preferences.theme == .glass {
                 if glass { BehindWindowBlur().transition(.opacity) }
                 GlassEffectContainer {
                     if glass {
@@ -191,6 +198,38 @@ struct NotchView: View {
         }
     }
 
+    /// The Viorim OS design kit's glass: the desktop blurred (`blur-glass`), Gunmetal over it
+    /// (`glass`, 72%; 55% under Liquid Glass on macOS 26, which adds its own depth), the steel light
+    /// in the top-left corner (`hero-tint`) and a hairline rim (`glass-rim`) that catches the light
+    /// along the bottom edge.
+    @ViewBuilder
+    private func viorimGlass(_ outline: NotchShape) -> some View {
+        let gunmetal = Color(red: 27 / 255, green: 31 / 255, blue: 35 / 255)
+        let steel = Color(red: 127 / 255, green: 162 / 255, blue: 201 / 255)
+        BehindWindowBlur().transition(.opacity)
+        if #available(macOS 26, *) {
+            GlassEffectContainer {
+                Color.clear.glassEffect(.clear, in: outline).glassEffectTransition(.materialize)
+            }
+            outline.fill(gunmetal.opacity(0.55)).transition(.opacity)
+        } else {
+            outline.fill(gunmetal.opacity(0.72)).transition(.opacity)
+        }
+        RadialGradient(colors: [steel.opacity(0.2), .clear], center: .topLeading, startRadius: 0, endRadius: 320)
+            .clipShape(outline)
+            .allowsHitTesting(false)
+            .transition(.opacity)
+        outline.stroke(Self.viorimRim, lineWidth: 1).transition(.opacity)
+    }
+
+    /// `glass-rim` (Frost at 10%) brightening to `hero-rim` toward the bottom, away from the screen edge.
+    private static let viorimRim = LinearGradient(
+        stops: [
+            .init(color: .clear, location: 0), .init(color: Color(red: 233 / 255, green: 237 / 255, blue: 240 / 255)
+                .opacity(0.1), location: 0.3),
+            .init(color: Color(red: 157 / 255, green: 178 / 255, blue: 203 / 255).opacity(0.28), location: 1),
+        ], startPoint: .top, endPoint: .bottom)
+
     /// Fades out toward the top edge, which sits against the top of the screen.
     private static let rim = LinearGradient(
         stops: [
@@ -201,8 +240,18 @@ struct NotchView: View {
     /// Live activities, one-shot or ongoing, come and go on their own spring.
     private var activityMotion: Animation? {
         if reduceMotion { return .easeInOut(duration: 0.12) }
-        return preferences.animationStyle == .instant ? nil : .spring(response: 0.3, dampingFraction: 0.85)
+        switch preferences.animationStyle {
+        case .instant: return nil
+        case .measured: return Self.snappy
+        default: return .spring(response: 0.3, dampingFraction: 0.85)
+        }
     }
+
+    /// The Viorim OS kit's springs: smooth (0.5 s, no bounce) for large things, snappy (0.33 s, a
+    /// slight settle) for small ones, and a quicker exit.
+    static let smooth = Animation.spring(response: 0.5, dampingFraction: 1)
+    static let snappy = Animation.spring(duration: 0.33, bounce: 0.15)
+    static let exit = Animation.spring(response: 0.3, dampingFraction: 1)
 
     /// Opening and closing in the user's chosen style. Hover only nudges and live activities keep
     /// their own spring; Reduce Motion swaps everything for a short ease.
@@ -228,6 +277,7 @@ struct NotchView: View {
         case .smooth: return .easeInOut(duration: opening ? 0.34 : 0.26)
         case .snappy: return .snappy(duration: opening ? 0.2 : 0.15)
         case .instant: return nil
+        case .measured: return opening ? Self.smooth : Self.exit
         }
     }
 
@@ -297,7 +347,7 @@ struct NotchView: View {
                             .scrollIndicators(.never)
                             .id(tab)
                             .transition(tabTransition)
-                            .animation(reduceMotion ? nil : .spring(response: 0.42, dampingFraction: 0.74), value: tab)
+                            .animation(tabMotion, value: tab)
                     }
                 }
                 .transition(.opacity)
@@ -425,30 +475,45 @@ struct NotchView: View {
                 .keyframeAnimator(initialValue: CGSize(width: 1, height: 1), trigger: selected) { capsule, scale in
                     capsule.scaleEffect(scale)
                 } keyframes: { _ in
-                    let stretch: CGFloat = reduceMotion ? 1 : 1.3
+                    let stretch: CGFloat = calmMotion ? 1 : 1.3
                     KeyframeTrack(\.width) {
                         SpringKeyframe(stretch, duration: 0.12)
-                        SpringKeyframe(reduceMotion ? 1 : 0.94, duration: 0.14)
+                        SpringKeyframe(calmMotion ? 1 : 0.94, duration: 0.14)
                         SpringKeyframe(1, duration: 0.24)
                     }
                     KeyframeTrack(\.height) {
                         SpringKeyframe(2 - stretch, duration: 0.12)
-                        SpringKeyframe(reduceMotion ? 1 : 1.05, duration: 0.14)
+                        SpringKeyframe(calmMotion ? 1 : 1.05, duration: 0.14)
                         SpringKeyframe(1, duration: 0.24)
                     }
                 }
         }
         .background(GlassPlatter(shape: Capsule()))
-        .animation(reduceMotion ? nil : .spring(response: 0.38, dampingFraction: 0.64), value: selected)
+        .animation(
+            reduceMotion ? nil : calmMotion ? Self.snappy : .spring(response: 0.38, dampingFraction: 0.64),
+            value: selected)
         .contextMenu {
             Button("Edit Tabs\u{2026}", action: startEditing)
         }
     }
 
+    /// Measured motion and Reduce Motion don't move tabs across: a quick cross-fade.
+    private var calmMotion: Bool { reduceMotion || preferences.animationStyle == .measured }
+
+    private var tabMotion: Animation? {
+        if reduceMotion { return .easeInOut(duration: 0.15) }
+        return preferences.animationStyle == .measured
+            ? .easeInOut(duration: 0.2) : .spring(response: 0.42, dampingFraction: 0.74)
+    }
+
     /// Content slides in from the side the selection moved toward, with a little scale and fade; an
-    /// app opened from the drawer zooms up from its grid instead.
+    /// app opened from the drawer zooms up from its grid instead. Measured motion cross-fades with an
+    /// 8 pt rise, as the Viorim kit changes sections.
     private var tabTransition: AnyTransition {
         guard !reduceMotion else { return .opacity }
+        if preferences.animationStyle == .measured {
+            return .asymmetric(insertion: .opacity.combined(with: .offset(y: 8)), removal: .opacity)
+        }
         if fromDrawer {
             return .asymmetric(insertion: .opacity.combined(with: .scale(scale: 0.9)), removal: .opacity)
         }

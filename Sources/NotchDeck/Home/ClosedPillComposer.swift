@@ -55,8 +55,8 @@ public final class ClosedPillComposer {
 
     public init() {}
 
-    /// Claude's coral, the same as its accent in the AI Usage tab.
-    public nonisolated static let claudeTint: UInt32 = 0xD97757
+    /// The ring's colour: the Viorim kit's one accent, steel.
+    public nonisolated static let ringTint: UInt32 = 0x9DB2CB
 
     private func compose() {
         let pill = Self.pill(media: media, pomodoro: pomodoro, claude: claude)
@@ -67,7 +67,7 @@ public final class ClosedPillComposer {
 
     nonisolated static func pill(media: Activity?, pomodoro: Activity?, claude: ClaudeSummary?) -> Activity? {
         let ring = claude.map {
-            Activity.Accessory(symbol: "terminal.fill", progress: $0.progress, tint: claudeTint, label: $0.label)
+            Activity.Accessory(symbol: "terminal.fill", progress: $0.progress, tint: ringTint, label: $0.label)
         }
         if var pill = pomodoro ?? media {
             pill.accessory = ring

@@ -9,6 +9,9 @@ import Observation
 /// motion, and Reduce Motion overrides every style.
 public enum NotchAnimationStyle: String, CaseIterable, Identifiable, Sendable {
     case spring, jelly, pop, smooth, snappy, instant
+    /// NotchDeck: the Viorim OS design kit's motion. A smooth spring with no bounce to open, a
+    /// quicker one to close, and cross-fades between tabs.
+    case measured
 
     public var id: Self { self }
 
@@ -20,6 +23,7 @@ public enum NotchAnimationStyle: String, CaseIterable, Identifiable, Sendable {
         case .smooth: "Smooth"
         case .snappy: "Snappy"
         case .instant: "Instant"
+        case .measured: "Measured"
         }
     }
 
@@ -31,6 +35,7 @@ public enum NotchAnimationStyle: String, CaseIterable, Identifiable, Sendable {
         case .smooth: "Eases in and out, no bounce."
         case .snappy: "Quick and crisp."
         case .instant: "No animation."
+        case .measured: "Settles without bounce, closes quicker than it opens. Viorim's motion."
         }
     }
 }
@@ -41,6 +46,9 @@ public enum NotchTheme: String, CaseIterable, Identifiable, Sendable {
     case black
     /// Liquid Glass over the desktop, on macOS 26 and later.
     case glass
+    /// NotchDeck: the Viorim OS design kit's Gunmetal glass, a tinted blur of the desktop with a
+    /// hairline rim and a steel light. Every macOS version; real Liquid Glass on 26.
+    case viorim
 
     public var id: Self { self }
 
@@ -48,6 +56,7 @@ public enum NotchTheme: String, CaseIterable, Identifiable, Sendable {
         switch self {
         case .black: "Black"
         case .glass: "Glass"
+        case .viorim: "Viorim Glass"
         }
     }
 }

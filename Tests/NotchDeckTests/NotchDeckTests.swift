@@ -80,7 +80,7 @@ struct ClosedPillTests {
     @Test func claudesRingRidesAlongWithWhatsPlaying() {
         let pill = ClosedPillComposer.pill(media: song, pomodoro: nil, claude: claude)
         #expect(pill?.title == "Midnight City" && pill?.feature == .media)
-        #expect(pill?.accessory?.progress == 0.5 && pill?.accessory?.tint == ClosedPillComposer.claudeTint)
+        #expect(pill?.accessory?.progress == 0.5 && pill?.accessory?.tint == ClosedPillComposer.ringTint)
     }
 
     @Test func pomodoroOutranksMusicAndClaudeShowsAlone() {

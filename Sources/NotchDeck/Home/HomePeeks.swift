@@ -20,7 +20,9 @@ struct PeekView: View {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 10, weight: .bold))
                         .frame(width: 22, height: 22)
-                        .background(.white.opacity(0.12), in: Circle())
+                        .foregroundStyle(Viorim.ink)
+                        .background(Viorim.surfaceRaised, in: Circle())
+                        .overlay(Circle().strokeBorder(Viorim.glassRim, lineWidth: 1))
                         .contentShape(Circle())
                 }
                 .buttonStyle(.plain)
@@ -98,23 +100,23 @@ private struct ClaudePeek: View {
                     Text("\(Deck.stateWord(session)) · \(Deck.detail(session, now: context.date))")
                 }
                 .font(.system(size: 11))
-                .foregroundStyle(waiting ? Color.orange : .white.opacity(0.6))
+                .foregroundStyle(waiting ? Viorim.warning : Viorim.ink2)
                 .lineLimit(1)
                 if let progress = session.progress, session.state != .done {
-                    AgentProgressBar(progress: progress, tint: waiting ? .orange : Deck.claude)
+                    AgentProgressBar(progress: progress, tint: waiting ? Viorim.warning : Viorim.accent)
                 }
             }
             Spacer(minLength: 0)
             if session.app != nil {
-                let tint = waiting ? Color.orange : .white.opacity(0.15)
-                PillButton("Go", tint: tint, foreground: waiting ? .black : .white) { agents.open(session) }
+                PillButton("Go", prominent: waiting) { agents.open(session) }
                     .help("Go to its terminal")
             }
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 5)
         .background(
-            waiting ? Color.orange.opacity(0.14) : .white.opacity(0.05), in: RoundedRectangle(cornerRadius: 9)
+            waiting ? Viorim.warningSoft.opacity(0.8) : Viorim.surfaceRaised.opacity(0.55),
+            in: RoundedRectangle(cornerRadius: Viorim.radiusWell)
         )
         .accessibilityElement(children: .combine)
     }
@@ -137,7 +139,10 @@ private struct FocusPeek: View {
                     }
                 }
                 HStack(spacing: 6) {
-                    PillButton(pomodoro.isRunning ? "Pause" : pomodoro.isActive ? "Resume" : "Start") {
+                    PillButton(
+                        pomodoro.isRunning ? "Pause" : pomodoro.isActive ? "Resume" : "Start",
+                        prominent: !pomodoro.isRunning
+                    ) {
                         pomodoro.toggle()
                     }
                     PillButton("Skip") { pomodoro.skip() }.disabled(!pomodoro.isActive)
@@ -150,7 +155,7 @@ private struct FocusPeek: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             VStack(alignment: .leading, spacing: 4) {
-                Text("FOCUS MODES").font(.system(size: 9.5, weight: .semibold)).foregroundStyle(.white.opacity(0.5))
+                SectionLabel("Focus modes")
                 if focus.names.isEmpty {
                     Text(
                         focus.hasLoaded
@@ -158,7 +163,7 @@ private struct FocusPeek: View {
                             : "Looking for your Focus shortcuts…"
                     )
                     .font(.system(size: 10.5))
-                    .foregroundStyle(.white.opacity(0.6))
+                    .foregroundStyle(Viorim.ink2)
                     .fixedSize(horizontal: false, vertical: true)
                     if focus.hasLoaded { PillButton("Open Shortcuts") { focus.openShortcutsApp() } }
                 } else {
@@ -180,10 +185,10 @@ private struct PomodoroRing: View {
         TimelineView(.periodic(from: .now, by: 1)) { context in
             let progress = pomodoro.progress(at: context.date)
             ZStack {
-                Circle().stroke(.white.opacity(0.15), lineWidth: 5)
+                Circle().stroke(Viorim.surfaceSunken, lineWidth: 4)
                 Circle()
                     .trim(from: 0, to: 1 - progress)
-                    .stroke(Deck.focus, style: StrokeStyle(lineWidth: 5, lineCap: .round))
+                    .stroke(Viorim.accent, style: StrokeStyle(lineWidth: 4, lineCap: .round))
                     .rotationEffect(.degrees(-90))
                 Image(systemName: pomodoro.phase.symbol)
                     .font(.system(size: 14, weight: .semibold))
@@ -213,7 +218,7 @@ private struct CalendarPeek: View {
                     }
                 case .notDetermined:
                     Detail("See your events here.")
-                    PillButton("Continue") { agenda.requestAccess() }
+                    PillButton("Continue", prominent: true) { agenda.requestAccess() }
                 case .denied:
                     Detail("Calendar access is off.")
                     PillButton("Open Settings") { agenda.openPrivacySettings() }
@@ -240,7 +245,7 @@ struct MiniMonth: View {
         let columns = Array(repeating: GridItem(.flexible(), spacing: 1), count: 7)
         LazyVGrid(columns: columns, spacing: 1) {
             ForEach(Array(weekdays.enumerated()), id: \.offset) { _, symbol in
-                Text(symbol).font(.system(size: 9, weight: .semibold)).foregroundStyle(.white.opacity(0.4))
+                Text(symbol).font(Viorim.label(8.5)).foregroundStyle(Viorim.ink3)
             }
             ForEach(0..<lead, id: \.self) { _ in Color.clear.frame(height: 15) }
             ForEach(Array(days), id: \.self) { number in
@@ -248,13 +253,13 @@ struct MiniMonth: View {
                     .font(.system(size: 9.5, weight: number == day ? .bold : .regular))
                     .monospacedDigit()
                     .frame(width: 17, height: 15)
-                    .background(number == day ? Color.red : .clear, in: Circle())
+                    .background(number == day ? Viorim.action : .clear, in: Circle())
                     .overlay(alignment: .bottom) {
                         if busyDays.contains(number), number != day {
                             Circle().fill(Deck.calendar).frame(width: 3, height: 3).offset(y: 2)
                         }
                     }
-                    .foregroundStyle(.white.opacity(number < day ? 0.45 : 0.9))
+                    .foregroundStyle(number == day ? Viorim.onAction : number < day ? Viorim.ink3 : Viorim.ink)
             }
         }
         .accessibilityElement()
@@ -297,7 +302,7 @@ private struct WeatherPeek: View {
             VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: 10) {
                     Image(systemName: forecast.symbol)
-                        .symbolRenderingMode(.multicolor)
+                        .symbolRenderingMode(.hierarchical)
                         .font(.system(size: 26))
                     Text(Forecast.degrees(forecast.temperature))
                         .font(.system(size: 28, weight: .semibold, design: .rounded))
@@ -311,11 +316,11 @@ private struct WeatherPeek: View {
                             HStack(spacing: 6) {
                                 Text(Forecast.dayName(day.date)).frame(width: 40, alignment: .leading)
                                 Image(systemName: WeatherCondition(code: day.code).symbol())
-                                    .symbolRenderingMode(.multicolor)
+                                    .symbolRenderingMode(.hierarchical)
                                     .frame(width: 16)
                                 Text("\(Forecast.degrees(day.high)) / \(Forecast.degrees(day.low))").monospacedDigit()
                                 if let rain = day.rainChance, rain >= 20 {
-                                    Text("\(rain)%").foregroundStyle(Deck.calendar)
+                                    Text("\(rain)%").foregroundStyle(Viorim.info)
                                 }
                             }
                             .font(.system(size: 11))
@@ -330,7 +335,7 @@ private struct WeatherPeek: View {
                 }
                 Link("Weather data by Open-Meteo.com", destination: URL(string: "https://open-meteo.com/")!)
                     .font(.system(size: 9.5))
-                    .foregroundStyle(.white.opacity(0.45))
+                    .foregroundStyle(Viorim.ink3)
             }
         } else {
             VStack(alignment: .leading, spacing: 6) {
@@ -368,14 +373,14 @@ private struct UserPeek: View {
             Text("Locks your Mac and opens the login window, where you can pick another user. Your apps keep running.")
                 .font(.system(size: 11.5))
                 .fixedSize(horizontal: false, vertical: true)
-            PillButton("Lock & Switch User", tint: .white, foreground: .black) { UserSwitcher.lockAndSwitch() }
+            PillButton("Lock & Switch User", prominent: true) { UserSwitcher.lockAndSwitch() }
             if !UserSwitcher.locksDirectly {
                 Text(
                     "Without Accessibility access, this puts the display to sleep instead. That locks your Mac "
                         + "when it asks for your password right away."
                 )
                 .font(.system(size: 10.5))
-                .foregroundStyle(.white.opacity(0.6))
+                .foregroundStyle(Viorim.ink2)
                 .fixedSize(horizontal: false, vertical: true)
                 PillButton("Allow Accessibility") { UserSwitcher.openAccessibilitySettings() }
             }
@@ -395,8 +400,9 @@ struct SectionLabel: View {
 
     var body: some View {
         Text(text.uppercased())
-            .font(.system(size: 9.5, weight: .semibold))
-            .foregroundStyle(.white.opacity(0.5))
+            .font(Viorim.label())
+            .tracking(0.6)
+            .foregroundStyle(Viorim.ink2)
             .lineLimit(1)
     }
 }
@@ -433,13 +439,13 @@ struct Stat: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text(value).font(.system(size: 14, weight: .semibold)).monospacedDigit().lineLimit(1)
-            Text(label).font(.system(size: 9.5)).foregroundStyle(.white.opacity(0.55)).lineLimit(1)
+            Text(value).font(Viorim.metric(17)).monospacedDigit().foregroundStyle(Viorim.ink).lineLimit(1)
+            Text(label).font(.system(size: 9.5)).foregroundStyle(Viorim.ink2).lineLimit(1)
         }
         .padding(.horizontal, 7)
         .padding(.vertical, 4)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 8))
+        .background(Viorim.surfaceSunken.opacity(0.55), in: RoundedRectangle(cornerRadius: Viorim.radiusWell))
         .accessibilityElement(children: .combine)
     }
 }
@@ -466,17 +472,17 @@ struct EnergyList: View {
                         AppIcon(path: app.isApp ? app.id : nil).frame(width: 14, height: 14)
                         Text(app.name).font(.system(size: 11)).lineLimit(1).frame(width: 74, alignment: .leading)
                         Capsule()
-                            .fill(.white.opacity(0.12))
+                            .fill(Viorim.surfaceSunken)
                             .frame(height: 4)
                             .overlay(alignment: .leading) {
                                 GeometryReader { track in
-                                    Capsule().fill(Deck.system).frame(width: track.size.width * app.watts / most)
+                                    Capsule().fill(Viorim.accent).frame(width: track.size.width * app.watts / most)
                                 }
                             }
                         Text(app.wattsText)
                             .font(.system(size: 10.5))
                             .monospacedDigit()
-                            .foregroundStyle(.white.opacity(0.6))
+                            .foregroundStyle(Viorim.ink2)
                             .frame(width: 38, alignment: .trailing)
                     }
                     .contentShape(Rectangle())
@@ -518,7 +524,7 @@ struct AccessoryList: View {
                     Text("\(accessory.percent)%")
                         .font(.system(size: 11))
                         .monospacedDigit()
-                        .foregroundStyle(accessory.percent <= 20 ? Color.orange : .white.opacity(0.7))
+                        .foregroundStyle(accessory.percent <= 20 ? Viorim.warning : Viorim.ink2)
                 }
                 .accessibilityElement(children: .combine)
             }
