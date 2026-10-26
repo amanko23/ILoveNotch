@@ -3,6 +3,9 @@ name: CI
 # Pull requests into main, and by hand from the Actions tab. Not pushes to main: the pull request
 # already tested that code, so a run there would repeat it.
 on:
+  # NotchDeck: every push to the notchdeck branch builds and tests on macOS too.
+  push:
+    branches: [notchdeck]
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened, ready_for_review]
