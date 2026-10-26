@@ -29,6 +29,14 @@ struct NotchDeckCoreTests {
         #expect(open.presentation == .expanded(tab: .notes) && open.lastTab == .notes)
     }
 
+    @Test func aHoveredActivityKeepsTheTabItOpens() {
+        let meeting = Activity(feature: .calendar, symbol: "video.fill", title: "Standup", duration: .zero)
+        let hovered = after(.show, .setOngoing(meeting), .pointerEntered, .setLastTab(.home))
+        #expect(hovered.presentation == .hoverArmed && hovered.lastTab == .calendar)
+        #expect(after(.show, .setOngoing(meeting), .pointerEntered, .setLastTab(.home), .clicked).presentation
+            == .expanded(tab: .calendar))
+    }
+
     @Test func anAccessoryTravelsWithItsActivity() {
         let ring = Activity.Accessory(symbol: "terminal.fill", progress: 0.5, tint: 0xD97757, label: "Claude, 3 of 6")
         let song = Activity(feature: .media, symbol: "music.note", title: "Song", duration: .zero, accessory: ring)

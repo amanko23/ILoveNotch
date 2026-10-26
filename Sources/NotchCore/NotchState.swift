@@ -196,7 +196,8 @@ public enum NotchEvent: Hashable, Sendable {
     case setOngoing(Activity?)
     /// The enabled features changed, in tab order.
     case setTabs([FeatureID])
-    /// The tab the notch opens on next time, when it's enabled. Changes nothing on screen.
+    /// The tab the notch opens on next time, when it's enabled and the notch is resting. Changes
+    /// nothing on screen.
     case setLastTab(FeatureID)
     case suspend(SuspendReason)
     case resume(SuspendReason)
@@ -291,7 +292,10 @@ public struct NotchState: Hashable, Sendable {
             }
         case (_, .setOngoing(let activity)):
             ongoing = activity
-        case (_, .setLastTab(let tab)) where tabs.contains(tab) && presentation.openTab == nil:
+        // Only while resting: a hovered or live activity has already picked the tab it opens.
+        case (.compact, .setLastTab(let tab)) where tabs.contains(tab),
+            (.hidden, .setLastTab(let tab)) where tabs.contains(tab),
+            (.suspended, .setLastTab(let tab)) where tabs.contains(tab):
             lastTab = tab
 
         // Suspending, attaching, and detaching win over everything else.
