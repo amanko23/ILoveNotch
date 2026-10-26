@@ -472,11 +472,19 @@ private struct ThemePicker: View {
             } else if option == .viorim {
                 // Gunmetal glass with the steel light and rim, as the Viorim OS kit draws it.
                 notch.fill(Color(red: 27 / 255, green: 31 / 255, blue: 35 / 255).opacity(0.72))
-                    .overlay(notch.fill(RadialGradient(
-                        colors: [Color(red: 127 / 255, green: 162 / 255, blue: 201 / 255).opacity(0.45), .clear],
-                        center: .topLeading, startRadius: 0, endRadius: 40)))
-                    .overlay(notch.stroke(Color(red: 157 / 255, green: 178 / 255, blue: 203 / 255).opacity(0.5),
-                        lineWidth: 0.75))
+                    .overlay(
+                        notch.fill(
+                            RadialGradient(
+                                colors: [
+                                    Color(red: 127 / 255, green: 162 / 255, blue: 201 / 255).opacity(0.45), .clear,
+                                ],
+                                center: .topLeading, startRadius: 0, endRadius: 40))
+                    )
+                    .overlay(
+                        notch.stroke(
+                            Color(red: 157 / 255, green: 178 / 255, blue: 203 / 255).opacity(0.5),
+                            lineWidth: 0.75)
+                    )
                     .frame(width: 58, height: 26)
             } else {
                 notch.fill(.black).frame(width: 58, height: 26)

@@ -225,8 +225,10 @@ struct NotchView: View {
     /// `glass-rim` (Frost at 10%) brightening to `hero-rim` toward the bottom, away from the screen edge.
     private static let viorimRim = LinearGradient(
         stops: [
-            .init(color: .clear, location: 0), .init(color: Color(red: 233 / 255, green: 237 / 255, blue: 240 / 255)
-                .opacity(0.1), location: 0.3),
+            .init(color: .clear, location: 0),
+            .init(
+                color: Color(red: 233 / 255, green: 237 / 255, blue: 240 / 255)
+                    .opacity(0.1), location: 0.3),
             .init(color: Color(red: 157 / 255, green: 178 / 255, blue: 203 / 255).opacity(0.28), location: 1),
         ], startPoint: .top, endPoint: .bottom)
 
@@ -491,7 +493,8 @@ struct NotchView: View {
         .background(GlassPlatter(shape: Capsule()))
         .animation(
             reduceMotion ? nil : calmMotion ? Self.snappy : .spring(response: 0.38, dampingFraction: 0.64),
-            value: selected)
+            value: selected
+        )
         .contextMenu {
             Button("Edit Tabs\u{2026}", action: startEditing)
         }
