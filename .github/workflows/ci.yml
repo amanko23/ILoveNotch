@@ -49,37 +49,75 @@ jobs:
             echo "code=false" >> "$GITHUB_OUTPUT"
           fi
 
+  # NotchDeck: on pushes to notchdeck, swift-format's fixes are committed back, every step runs
+  # even after one fails, and each job's logs are force-pushed to a ci-logs-<job> branch, so they
+  # can be read with plain git. The job still fails when any step does.
   check:
     name: Secrets, lint, tests
     needs: changes
     if: needs.changes.outputs.code == 'true'
     # macos-26 ships Xcode 26.6 by default: the toolchain the project is developed with.
     runs-on: macos-26
-    timeout-minutes: 20
+    timeout-minutes: 30
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v5
 
       - name: Toolchain
-        run: xcodebuild -version && swift --version
+        run: (xcodebuild -version && swift --version) 2>&1 | tee toolchain.log
 
       - name: No keys or credentials
-        run: make secrets
+        id: secrets
+        continue-on-error: true
+        run: set -o pipefail; make secrets 2>&1 | tee secrets.log
+
+      - name: Apply formatting
+        if: github.event_name == 'push'
+        run: |
+          make format
+          if ! git diff --quiet; then
+            git config user.name "notchdeck-ci"
+            git config user.email "notchdeck-ci@users.noreply.github.com"
+            git commit -qam "Apply swift-format"
+            git push origin HEAD:${{ github.ref_name }} || echo "Couldn't push the formatting commit"
+          fi
 
       - name: Formatting
-        run: make lint
+        id: lint
+        continue-on-error: true
+        run: set -o pipefail; make lint 2>&1 | tee lint.log
 
       - name: Release notes for this version
-        run: make changelog
+        id: changelog
+        continue-on-error: true
+        run: set -o pipefail; make changelog 2>&1 | tee changelog.log
 
       - name: Unit and performance tests
-        run: make test
+        id: test
+        continue-on-error: true
+        run: set -o pipefail; make test 2>&1 | tee test.log
+
+      - name: Publish logs
+        if: always() && github.event_name == 'push'
+        env:
+          TOKEN: ${{ github.token }}
+        run: scripts/publish-ci-logs.sh check
+
+      - name: Result
+        if: steps.secrets.outcome == 'failure' || steps.lint.outcome == 'failure' || steps.changelog.outcome == 'failure' || steps.test.outcome == 'failure'
+        run: |
+          echo "secrets=${{ steps.secrets.outcome }} lint=${{ steps.lint.outcome }} changelog=${{ steps.changelog.outcome }} test=${{ steps.test.outcome }}"
+          exit 1
 
   app:
     name: App and licenses
     needs: changes
     if: needs.changes.outputs.code == 'true'
     runs-on: macos-26
-    timeout-minutes: 20
+    timeout-minutes: 30
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v5
         with:
@@ -91,8 +129,26 @@ jobs:
       # Release, since the optimizer has crashed on code that builds in Debug, but for one
       # architecture and without a dSYM: this checks that it compiles, a third faster.
       - name: Release build
-        run: make build CONFIGURATION=Release XCODEBUILD_ARGS='ONLY_ACTIVE_ARCH=YES DEBUG_INFORMATION_FORMAT=dwarf'
+        id: build
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          make build CONFIGURATION=Release XCODEBUILD_ARGS='ONLY_ACTIVE_ARCH=YES DEBUG_INFORMATION_FORMAT=dwarf' 2>&1 | tee build.log
 
       # After the build, so Xcode has resolved the app's packages for the check.
       - name: License check
-        run: make licenses
+        id: licenses
+        continue-on-error: true
+        run: set -o pipefail; make licenses 2>&1 | tee licenses.log
+
+      - name: Publish logs
+        if: always() && github.event_name == 'push'
+        env:
+          TOKEN: ${{ github.token }}
+        run: scripts/publish-ci-logs.sh app
+
+      - name: Result
+        if: steps.build.outcome == 'failure' || steps.licenses.outcome == 'failure'
+        run: |
+          echo "build=${{ steps.build.outcome }} licenses=${{ steps.licenses.outcome }}"
+          exit 1
