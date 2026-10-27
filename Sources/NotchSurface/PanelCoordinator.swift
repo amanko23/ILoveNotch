@@ -185,7 +185,10 @@ public final class PanelCoordinator {
         let options: CGWindowListOption = [.optionOnScreenOnly, .excludeDesktopElements]
         let windows = CGWindowListCopyWindowInfo(options, kCGNullWindowID) as? [[String: Any]] ?? []
         for controller in controllers {
-            let filled = Self.isFilled(CGDisplayBounds(controller.displayID), by: windows)
+            let display = CGDisplayBounds(controller.displayID)
+            // NotchDeck: a window as big as the display isn't full screen while the menu bar still
+            // shows on it (a zoomed or tiled window on another desktop); only real full screen hides it.
+            let filled = Self.isFilled(display, by: windows) && !Self.showsMenuBar(display, in: windows)
             controller.engine.send(filled ? .suspend(.fullScreen) : .resume(.fullScreen))
         }
     }
@@ -193,6 +196,17 @@ public final class PanelCoordinator {
     /// Whether an app's window covers all of `display`, as a full-screen app does. Apps' windows sit
     /// in layer 0, under the menu bar, the Dock, and the notch. Bounds are the window server's,
     /// measured from the top left, like CGDisplayBounds.
+    /// Whether the menu bar's window is on screen over `display`. Full-screen Spaces hide it.
+    nonisolated static func showsMenuBar(_ display: CGRect, in windows: [[String: Any]]) -> Bool {
+        windows.contains { window in
+            guard window[kCGWindowLayer as String] as? Int == Int(CGWindowLevelForKey(.mainMenuWindow)),
+                let bounds = window[kCGWindowBounds as String] as? NSDictionary,
+                let frame = CGRect(dictionaryRepresentation: bounds as CFDictionary)
+            else { return false }
+            return frame.intersects(display)
+        }
+    }
+
     nonisolated static func isFilled(_ display: CGRect, by windows: [[String: Any]]) -> Bool {
         windows.contains { window in
             guard window[kCGWindowLayer as String] as? Int == 0,
