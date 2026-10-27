@@ -194,10 +194,10 @@ private struct HomeFooter: View {
             Spacer(minLength: 4)
             HStack(spacing: 8) {
                 TimelineView(.everyMinute) { context in
-                Text(IST.date(context.date) + " · " + IST.time(context.date) + " IST")
-                    .font(Viorim.footnote)
-                    .monospacedDigit()
-                    .foregroundStyle(Viorim.ink2)
+                    Text(IST.date(context.date) + " · " + IST.time(context.date) + " IST")
+                        .font(Viorim.footnote)
+                        .monospacedDigit()
+                        .foregroundStyle(Viorim.ink2)
                 }
                 appearance
             }
