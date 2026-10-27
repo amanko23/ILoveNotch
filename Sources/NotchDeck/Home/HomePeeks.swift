@@ -44,10 +44,11 @@ struct PeekView: View {
             let count = home.agents.sessions.count
             return count == 1 ? "Claude Code · 1 session" : "Claude Code · \(count) sessions"
         case .focus: return "Focus"
-        case .calendar: return Date.now.formatted(.dateTime.month(.wide).year())
+        case .calendar: return IST.month(.now)
         case .system: return "Battery & energy"
         case .weather: return home.weather.forecast?.place.map { "Weather · \($0)" } ?? "Weather"
         case .user: return "Switch User"
+        case .viorim: return "Viorim OS"
         }
     }
 
@@ -57,38 +58,86 @@ struct PeekView: View {
         case .claude: .agents
         case .calendar: .calendar
         case .system: .system
-        case .focus, .weather, .user: nil
+        case .focus, .weather, .user, .viorim: nil
         }
     }
 
     @ViewBuilder private var content: some View {
         switch peek {
-        case .claude: ClaudePeek(agents: home.agents)
+        case .claude: ClaudePeek(agents: home.agents, projects: home.agentProjects)
         case .focus: FocusPeek(pomodoro: home.pomodoro, focus: home.focus)
         case .calendar: CalendarPeek(agenda: home.agenda)
         case .system: SystemPeek(monitor: home.monitor)
         case .weather: WeatherPeek(weather: home.weather, openSettings: { home.openSettings?() })
         case .user: UserPeek()
+        case .viorim: ViorimPeek(viorim: home.viorimOS)
         }
     }
 }
 
 // MARK: Claude Code
 
+/// A page per agent project (holdings, IPO, industry, investor, Viorim OS by default), each with
+/// its own Claude sessions; "All" shows every session, "Other" the rest.
 private struct ClaudePeek: View {
     let agents: AgentsFeature
+    let projects: [String]
+    @State private var page = "All"
 
     var body: some View {
-        if agents.sessions.isEmpty {
-            Detail("No sessions. Start Claude Code in a terminal and it shows up here.")
-        } else {
-            ScrollView {
-                VStack(spacing: 4) {
-                    ForEach(agents.sessions) { session in row(session) }
+        VStack(alignment: .leading, spacing: 6) {
+            ScrollView(.horizontal) {
+                HStack(spacing: 4) {
+                    ForEach(pages, id: \.self) { name in
+                        let count = sessions(on: name).count
+                        Button {
+                            page = name
+                        } label: {
+                            Text(count > 0 ? "\(Self.short(name)) \(count)" : Self.short(name))
+                                .font(.system(size: 10.5, weight: .semibold))
+                                .foregroundStyle(page == name ? Viorim.onAction : Viorim.ink2)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 3)
+                                .background(
+                                    page == name ? Viorim.action : Viorim.surfaceRaised.opacity(0.6), in: Capsule())
+                        }
+                        .buttonStyle(PressStyle())
+                    }
                 }
             }
-            .fadingEdges()
+            .scrollIndicators(.never)
+            let shown = sessions(on: page)
+            if shown.isEmpty {
+                Detail(page == "All" ? "No sessions. Start Claude Code in a terminal." : "Nothing running in \(page).")
+            } else {
+                ScrollView {
+                    VStack(spacing: 4) {
+                        ForEach(shown) { session in row(session) }
+                    }
+                }
+                .fadingEdges()
+            }
         }
+    }
+
+    private var pages: [String] {
+        let others = agents.sessions.contains { !projects.contains($0.project) }
+        return ["All"] + projects + (others ? ["Other"] : [])
+    }
+
+    private func sessions(on page: String) -> [AgentSession] {
+        switch page {
+        case "All": agents.sessions
+        case "Other": agents.sessions.filter { !projects.contains($0.project) }
+        default: agents.sessions.filter { $0.project == page }
+        }
+    }
+
+    /// "holdings-agent" reads "Holdings"; "viorim-os" reads "Viorim OS".
+    static func short(_ project: String) -> String {
+        if project == "viorim-os" { return "Viorim OS" }
+        let base = project.hasSuffix("-agent") ? String(project.dropLast(6)) : project
+        return base.prefix(1).uppercased() + base.dropFirst()
     }
 
     private func row(_ session: AgentSession) -> some View {
@@ -361,7 +410,37 @@ private struct WeatherPeek: View {
     private func status(_ forecast: Forecast) -> String {
         if case .failed(let message) = weather.status { return message }
         if weather.status == .loading || weather.status == .locating { return "Updating…" }
-        return "Updated \(forecast.fetched.formatted(date: .omitted, time: .shortened))"
+        return "Updated \(IST.time(forecast.fetched)) IST"
+    }
+}
+
+// MARK: Viorim OS
+
+private struct ViorimPeek: View {
+    let viorim: ViorimOS
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if let status = viorim.status {
+                HStack(spacing: 6) {
+                    Stat(value: status.total.map { "\($0)" } ?? "—", label: "waiting for you")
+                    Stat(value: status.reviews.map { "\($0)" } ?? "—", label: "reviews")
+                    Stat(value: status.approvals.map { "\($0)" } ?? "—", label: "approvals")
+                    Stat(value: status.quotes.map { "\($0)" } ?? "—", label: "quotes")
+                }
+            } else {
+                Text(
+                    viorim.reachable == false
+                        ? "Viorim OS isn't answering at \(viorim.address). Start it, or change the address in "
+                            + "Settings › Home."
+                        : "Counts appear here once Viorim OS serves /api/notch."
+                )
+                .font(Viorim.footnote)
+                .foregroundStyle(Viorim.ink2)
+                .fixedSize(horizontal: false, vertical: true)
+            }
+            PillButton("Open Viorim OS", prominent: true) { viorim.open() }
+        }
     }
 }
 

@@ -183,10 +183,14 @@ struct NotchView: View {
                 viorimGlass(outline)
             } else if preferences.theme == .viorim, engine.state.presentation.openTab != nil {
                 // No glass (Reduce Transparency, Increase Contrast): the kit's solid canvas instead.
+                // Light: Frost washing into the kit's sky blue (highlight); dark: the Gunmetal canvas.
                 outline.fill(
-                    viorimLight
-                        ? Color(red: 226 / 255, green: 232 / 255, blue: 236 / 255)
-                        : Color(red: 18 / 255, green: 21 / 255, blue: 24 / 255)
+                    LinearGradient(
+                        colors: viorimLight
+                            ? [Color(red: 226 / 255, green: 232 / 255, blue: 236 / 255),
+                                Color(red: 200 / 255, green: 214 / 255, blue: 232 / 255)]
+                            : [Color(red: 18 / 255, green: 21 / 255, blue: 24 / 255)],
+                        startPoint: .topLeading, endPoint: .bottomTrailing)
                 )
                 .transition(.opacity)
             } else if #available(macOS 26, *), preferences.theme == .glass {
@@ -241,7 +245,7 @@ struct NotchView: View {
             let sky = Color(red: 200 / 255, green: 214 / 255, blue: 232 / 255)
             outline.fill(
                 LinearGradient(
-                    colors: [tint.opacity(0.86), sky.opacity(0.86)], startPoint: .topLeading,
+                    colors: [tint.opacity(0.9), sky.opacity(0.95)], startPoint: .topLeading,
                     endPoint: .bottomTrailing)
             )
             .transition(.opacity)

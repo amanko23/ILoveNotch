@@ -15,6 +15,7 @@ private struct HomeSettings: View {
     var body: some View {
         @Bindable var pomodoro = home.pomodoro
         @Bindable var weather = home.weather
+        @Bindable var viorim = home.viorimOS
         Group {
             Section {
                 Toggle(isOn: $home.opensOnHome) {
@@ -24,6 +25,22 @@ private struct HomeSettings: View {
                 Toggle(isOn: $home.showsClaudeInClosedNotch) {
                     Text("Show Claude's progress in the closed notch")
                     Text("A ring beside what's playing, or Claude on its own, while a session works.")
+                }
+            }
+            Section("Viorim OS and agents") {
+                LabeledContent {
+                    TextField("Address", text: $viorim.address, prompt: Text("http://localhost:3000"))
+                        .labelsHidden()
+                        .frame(maxWidth: 220)
+                } label: {
+                    Text("Viorim OS address")
+                    Text("The tile opens it, and shows what's waiting when it serves /api/notch.")
+                }
+                LabeledContent {
+                    TextField("Agents", text: projects).labelsHidden().frame(maxWidth: 260)
+                } label: {
+                    Text("Agent projects")
+                    Text("Folder names, separated by commas. Each gets a page in the Claude peek.")
                 }
             }
             Section("Pomodoro") {
@@ -69,6 +86,16 @@ private struct HomeSettings: View {
                 }
             }
         }
+    }
+
+    /// The agent projects as one comma-separated line.
+    private var projects: Binding<String> {
+        Binding(
+            get: { home.agentProjects.joined(separator: ", ") },
+            set: { line in
+                home.agentProjects = line.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+                    .filter { !$0.isEmpty }
+            })
     }
 
     /// Automatic (0), Celsius (1), or Fahrenheit (2).

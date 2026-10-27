@@ -38,6 +38,12 @@ extension CalendarFeature {
                     "Five minutes before a meeting with a Zoom, Google Meet, Teams, Webex, Whereby, Jitsi, or "
                         + "FaceTime link, the closed notch counts down to it. Join from the Calendar tab.")
             }
+            // NotchDeck: every timed event, not only calls.
+            Toggle(isOn: $calendar.countsDownToEveryEvent) {
+                Text("Count down to every event")
+                Text("Any timed event counts down in the closed notch from five minutes before, not only calls.")
+            }
+            .disabled(!calendar.countsDownToMeetings)
         }
         .onAppear(perform: calendar.refreshAccess)
     }

@@ -28,11 +28,12 @@ struct HomeView: View {
     private var dashboard: some View {
         VStack(spacing: 6) {
             HStack(spacing: 6) {
-                ClaudeTile(home: home)
-                FocusTile(home: home)
+                ClaudeTile(home: home).layoutPriority(1)
+                ViorimTile(home: home)
             }
             .frame(maxHeight: .infinity)
             HStack(spacing: 6) {
+                FocusTile(home: home)
                 TodayTile(home: home)
                 SystemTile(home: home)
             }
@@ -116,7 +117,7 @@ private struct TodayTile: View {
 
     var body: some View {
         let agenda = home.agenda
-        let today = Date.now.formatted(.dateTime.weekday(.abbreviated).day())
+        let today = IST.day(.now)
         Tile(title: "Today · \(today)", symbol: "calendar", tint: Deck.calendar, home: home, opens: .calendar) {
             switch agenda.access {
             case .granted:
@@ -166,6 +167,28 @@ private struct SystemTile: View {
     }
 }
 
+/// Viorim OS: what's waiting for you there, and a way in.
+private struct ViorimTile: View {
+    let home: HomeFeature
+
+    var body: some View {
+        let viorim = home.viorimOS
+        Tile(title: "Viorim OS", symbol: "square.grid.2x2", tint: Viorim.accent, home: home, opens: .viorim) {
+            if let total = viorim.status?.total {
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    Text("\(total)").font(Viorim.metric(26)).monospacedDigit().foregroundStyle(Viorim.ink)
+                    Text("waiting for you").font(Viorim.footnote).foregroundStyle(Viorim.ink2)
+                }
+                if let breakdown = viorim.status?.breakdown { Detail(breakdown) }
+            } else {
+                Detail(viorim.reachable == false ? "Not running at \(viorim.address)" : "RFQs, plans, quotes")
+            }
+            Spacer(minLength: 0)
+            PillButton("Open", prominent: true) { viorim.open() }
+        }
+    }
+}
+
 // MARK: Footer
 
 /// The weather, the light/dark switch, and Switch User, along the bottom.
@@ -176,10 +199,14 @@ private struct HomeFooter: View {
         HStack(spacing: 0) {
             weather
             Spacer(minLength: 4)
-            appearance
+            TimelineView(.everyMinute) { context in
+                Text(IST.date(context.date) + " · " + IST.time(context.date) + " IST")
+                    .font(Viorim.footnote)
+                    .monospacedDigit()
+                    .foregroundStyle(Viorim.ink2)
+            }
             Spacer(minLength: 4)
-            FooterButton(symbol: "person.2", title: "Switch User", tint: Viorim.ink2) { home.show(.user) }
-                .help("Lock and switch to another user")
+            appearance
         }
         .frame(height: 22)
     }

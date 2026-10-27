@@ -15,7 +15,7 @@ import SwiftUI
 public final class HomeFeature: NotchFeature {
     /// The detail a tile opens, in place of the tiles.
     public enum Peek: String, Sendable {
-        case claude, focus, calendar, system, weather, user
+        case claude, focus, calendar, system, weather, user, viorim
     }
 
     public let id = FeatureID.home
@@ -31,6 +31,16 @@ public final class HomeFeature: NotchFeature {
     public let focus = FocusShortcuts()
     public let monitor: SystemMonitor
     public let agents: AgentsFeature
+    public let viorimOS: ViorimOS
+
+    /// Per-feature setting: the agent projects that get a page each in the Claude peek, by folder
+    /// name. Sessions in any other folder share an "Other" page.
+    public var agentProjects: [String] {
+        didSet { defaults.set(agentProjects, forKey: Key.agentProjects) }
+    }
+    public static let defaultAgentProjects = [
+        "holdings-agent", "ipo-agent", "industry-agent", "investor-agent", "viorim-os",
+    ]
 
     /// Per-feature setting: the notch always opens on Home, not the tab used last.
     public var opensOnHome: Bool {
@@ -55,6 +65,8 @@ public final class HomeFeature: NotchFeature {
         pomodoro = Pomodoro(defaults: defaults)
         weather = WeatherModel(defaults: defaults)
         agenda = Agenda(eventStore: eventStore)
+        viorimOS = ViorimOS(defaults: defaults)
+        agentProjects = defaults.stringArray(forKey: Key.agentProjects) ?? Self.defaultAgentProjects
         opensOnHome = defaults.object(forKey: Key.opensOnHome) as? Bool ?? true
         showsClaudeInClosedNotch = defaults.object(forKey: Key.showsClaude) as? Bool ?? true
     }
@@ -80,11 +92,13 @@ public final class HomeFeature: NotchFeature {
     private func update() {
         if phase == .foreground {
             monitor.start(for: "home")
+            viorimOS.start()
             agenda.start()
             appearance.startObserving()
             weather.refreshIfStale()
         } else {
             monitor.stop(for: "home")
+            viorimOS.stop()
             agenda.stop()
             appearance.stopObserving()
             peek = nil
@@ -94,6 +108,7 @@ public final class HomeFeature: NotchFeature {
     private enum Key {
         static let opensOnHome = "home.opensOnHome"
         static let showsClaude = "home.showsClaudeInClosedNotch"
+        static let agentProjects = "home.agentProjects"
     }
 }
 

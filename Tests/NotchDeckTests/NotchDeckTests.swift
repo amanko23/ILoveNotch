@@ -254,7 +254,7 @@ struct HomeRenderTests {
         try render(home().view, name: "home")
     }
 
-    @Test(arguments: [HomeFeature.Peek.claude, .focus, .calendar, .system, .weather, .user])
+    @Test(arguments: [HomeFeature.Peek.claude, .focus, .calendar, .system, .weather, .user, .viorim])
     func everyPeekDraws(peek: HomeFeature.Peek) throws {
         let home = home()
         home.peek = peek
@@ -287,5 +287,19 @@ struct HomeRenderTests {
             try bitmap.representation(using: .png, properties: [:])?.write(
                 to: URL(filePath: directory).appending(path: "\(name).png"))
         }
+    }
+}
+
+struct ViorimOSTests {
+    @Test func theStatusAddsUpWhatsWaiting() throws {
+        let json = #"{"reviews":3,"approvals":2,"quotes":1}"#
+        let status = try JSONDecoder().decode(ViorimOS.Status.self, from: Data(json.utf8))
+        #expect(status.total == 6 && status.breakdown == "3 reviews · 2 approvals · 1 quote")
+        #expect(ViorimOS.Status(waiting: 9).total == 9)
+    }
+
+    @Test func timesAreInIndiaStandardTime() {
+        let noonUTC = Date(timeIntervalSince1970: 1_793_102_400)  // 27 Oct 2026, 12:00 UTC
+        #expect(IST.time(noonUTC) == "17:30" && IST.date(noonUTC) == "27 Oct 2026")
     }
 }

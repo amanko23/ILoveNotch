@@ -22,9 +22,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     #else
         // NotchDeck keeps the row to what it's for (Home, Media, Calendar, Timer, Agents, System);
         // every other tab starts on, in the drawer, a click away.
-        private let preferences = NotchPreferences(drawerByDefault: [
-            .sound, .shelf, .clipboard, .tasks, .notes, .shortcuts, .network, .mirror, .usage,
-        ])
+        // Shelf, Clipboard, Tasks, Notes, Shortcuts, Mirror and AI Usage are left out of NotchDeck;
+        // Sound and Network stay in the drawer.
+        private let preferences = NotchPreferences(
+            unavailable: [.shelf, .clipboard, .tasks, .notes, .shortcuts, .mirror, .usage],
+            drawerByDefault: [.sound, .network])
         private let usage = UsageFeature()
         private let agents: AgentsFeature
         /// NotchDeck: Home, the dashboard; System, battery and energy; and the closed notch's pill.
@@ -201,7 +203,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         let content = NotchContent(
             tab: { [unowned self] in self.tabView(for: $0) },
-            dropFiles: { [preferences, shelf] urls in preferences.isEnabled(.shelf) && shelf.add(urls) },
+            dropFiles: { [preferences, shelf] urls in preferences.tabs.contains(.shelf) && shelf.add(urls) },
             openSettings: { [weak self] in self?.settings.show() })
         let coordinator = PanelCoordinator(preferences: preferences, content: content)
         coordinator.onPresentationsChange = { [weak self] presentations in

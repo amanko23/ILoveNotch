@@ -105,6 +105,13 @@ public final class CalendarFeature: NotchFeature {
             update()
         }
     }
+    /// NotchDeck: count down to every timed event, not only calls with a video link.
+    public var countsDownToEveryEvent: Bool {
+        didSet {
+            defaults.set(countsDownToEveryEvent, forKey: "calendar.countsDownToEveryEvent")
+            update()
+        }
+    }
     /// Raised when a meeting's countdown starts, with the meeting's name.
     @ObservationIgnored public var onActivity: ((Activity) -> Void)?
     /// The countdown to the next meeting, or nil when there's none to show.
@@ -135,6 +142,7 @@ public final class CalendarFeature: NotchFeature {
         showsAllDay = defaults.object(forKey: Self.allDayKey) as? Bool ?? true
         showsTasks = defaults.object(forKey: Self.showsTasksKey) as? Bool ?? true
         countsDownToMeetings = defaults.object(forKey: Self.countdownKey) as? Bool ?? true
+        countsDownToEveryEvent = defaults.object(forKey: "calendar.countsDownToEveryEvent") as? Bool ?? true
     }
 
     public var view: some View { CalendarView(calendar: self) }
@@ -340,9 +348,15 @@ public final class CalendarFeature: NotchFeature {
 
     /// The next meeting worth counting down to: timed, with a link, not declined, not joined yet, and
     /// not started.
-    static func nextMeeting(in events: [DayEvent], after now: Date, skipping joined: Set<DayEvent.ID>) -> DayEvent? {
+    /// `everyEvent` (NotchDeck) counts down to any timed event, not only calls with a link.
+    static func nextMeeting(
+        in events: [DayEvent], after now: Date, skipping joined: Set<DayEvent.ID>, everyEvent: Bool = false
+    ) -> DayEvent? {
         events
-            .filter { !$0.isAllDay && $0.meeting != nil && !$0.isDeclined && !joined.contains($0.id) && $0.start > now }
+            .filter {
+                !$0.isAllDay && ($0.meeting != nil || everyEvent) && !$0.isDeclined && !joined.contains($0.id)
+                    && $0.start > now
+            }
             .min { ($0.start, $0.title) < ($1.start, $1.title) }
     }
 
@@ -362,7 +376,9 @@ public final class CalendarFeature: NotchFeature {
         let now = Date.now
         let store = eventStore.store
         let ahead = store.predicateForEvents(withStart: now, end: now + Self.horizon, calendars: nil)
-        let next = Self.nextMeeting(in: store.events(matching: ahead).map(DayEvent.init), after: now, skipping: joined)
+        let next = Self.nextMeeting(
+            in: store.events(matching: ahead).map(DayEvent.init), after: now, skipping: joined,
+            everyEvent: countsDownToEveryEvent)
         count(down: next.flatMap { $0.start - Self.lead <= now ? $0 : nil })
         let delay = Self.nextWake(for: next, now: now).timeIntervalSince(now)
         wake = Task { [weak self] in

@@ -24,11 +24,9 @@ public struct AgendaEvent: Identifiable, Hashable, Sendable {
 
     /// "10:30", "All day", or a later day's name: "Tue".
     public func when(now: Date = .now) -> String {
-        let calendar = Calendar.current
-        if !calendar.isDate(start, inSameDayAs: now), start > now {
-            return start.formatted(.dateTime.weekday(.abbreviated))
-        }
-        return isAllDay ? "All day" : start.formatted(date: .omitted, time: .shortened)
+        let calendar = IST.calendar
+        if !calendar.isDate(start, inSameDayAs: now), start > now { return IST.weekday(start) }
+        return isAllDay ? "All day" : IST.time(start)
     }
 }
 
