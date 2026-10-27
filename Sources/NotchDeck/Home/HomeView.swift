@@ -341,7 +341,7 @@ struct Tile<Content: View>: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background {
             ZStack {
-                shape.fill(Viorim.surfaceRaised.opacity(hovering ? 0.72 : 0.55))
+                shape.fill(Viorim.surfaceRaised.opacity(hovering ? 0.8 : 0.62))
                 if hero {
                     RadialGradient(
                         colors: [Viorim.heroTint, .clear], center: .topLeading, startRadius: 0, endRadius: 170

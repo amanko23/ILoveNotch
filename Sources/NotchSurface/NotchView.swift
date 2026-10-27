@@ -181,6 +181,14 @@ struct NotchView: View {
         ZStack(alignment: .top) {
             if preferences.theme == .viorim, glass {
                 viorimGlass(outline)
+            } else if preferences.theme == .viorim, engine.state.presentation.openTab != nil {
+                // No glass (Reduce Transparency, Increase Contrast): the kit's solid canvas instead.
+                outline.fill(
+                    viorimLight
+                        ? Color(red: 226 / 255, green: 232 / 255, blue: 236 / 255)
+                        : Color(red: 18 / 255, green: 21 / 255, blue: 24 / 255)
+                )
+                .transition(.opacity)
             } else if #available(macOS 26, *), preferences.theme == .glass {
                 if glass { BehindWindowBlur().transition(.opacity) }
                 GlassEffectContainer {
@@ -215,7 +223,7 @@ struct NotchView: View {
         // glass: Frost (244,246,248) in light, Gunmetal (27,31,35) in dark.
         let tint =
             light
-            ? Color(red: 244 / 255, green: 246 / 255, blue: 248 / 255)
+            ? Color(red: 226 / 255, green: 232 / 255, blue: 236 / 255)
             : Color(red: 27 / 255, green: 31 / 255, blue: 35 / 255)
         // hero-tint: Datum (48,62,80) at 8% in light, steel (127,162,201) at 20% in dark.
         let glow =
@@ -227,7 +235,16 @@ struct NotchView: View {
             GlassEffectContainer {
                 Color.clear.glassEffect(.clear, in: outline).glassEffectTransition(.materialize)
             }
-            outline.fill(tint.opacity(0.55)).transition(.opacity)
+        }
+        if light {
+            // Light: Frost (the canvas) washing into the kit's sky (highlight, 200,214,232).
+            let sky = Color(red: 200 / 255, green: 214 / 255, blue: 232 / 255)
+            outline.fill(
+                LinearGradient(
+                    colors: [tint.opacity(0.86), sky.opacity(0.86)], startPoint: .topLeading,
+                    endPoint: .bottomTrailing)
+            )
+            .transition(.opacity)
         } else {
             outline.fill(tint.opacity(0.72)).transition(.opacity)
         }
@@ -738,7 +755,7 @@ private struct BehindWindowBlur: NSViewRepresentable {
 
     func makeNSView(context: Context) -> NSVisualEffectView {
         let view = PassThroughEffectView()
-        view.material = .hudWindow
+        view.material = light ? .popover : .hudWindow
         view.blendingMode = .behindWindow
         view.state = .active
         view.appearance = NSAppearance(named: light ? .aqua : .darkAqua)  // dark unless Viorim's light glass
