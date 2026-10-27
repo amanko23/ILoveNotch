@@ -187,8 +187,10 @@ struct NotchView: View {
                 outline.fill(
                     LinearGradient(
                         colors: viorimLight
-                            ? [Color(red: 226 / 255, green: 232 / 255, blue: 236 / 255),
-                                Color(red: 200 / 255, green: 214 / 255, blue: 232 / 255)]
+                            ? [
+                                Color(red: 226 / 255, green: 232 / 255, blue: 236 / 255),
+                                Color(red: 200 / 255, green: 214 / 255, blue: 232 / 255),
+                            ]
                             : [Color(red: 18 / 255, green: 21 / 255, blue: 24 / 255)],
                         startPoint: .topLeading, endPoint: .bottomTrailing)
                 )
