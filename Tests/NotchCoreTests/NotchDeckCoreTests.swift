@@ -38,13 +38,11 @@ struct NotchDeckCoreTests {
                 == .expanded(tab: .calendar))
     }
 
-    @MainActor
-    @Test func theViorimLookIsAThemeAndAMotion() throws {
+    // NotchDeck's defaults are registered in App/main.swift; registering them here would leak into
+    // every other test, since the registration domain is shared by the whole process.
+    @Test func theViorimLookIsAThemeAndAMotion() {
         #expect(NotchTheme.viorim.title == "Viorim Glass" && NotchAnimationStyle.measured.title == "Measured")
-        let defaults = try #require(UserDefaults(suiteName: "NotchDeckCore.\(UUID().uuidString)"))
-        defaults.register(defaults: ["theme": "viorim", "animationStyle": "measured"])
-        let preferences = NotchPreferences(defaults: defaults)
-        #expect(preferences.theme == .viorim && preferences.animationStyle == .measured, "NotchDeck's defaults")
+        #expect(NotchTheme(rawValue: "viorim") == .viorim && NotchAnimationStyle(rawValue: "measured") == .measured)
     }
 
     @Test func anAccessoryTravelsWithItsActivity() {
