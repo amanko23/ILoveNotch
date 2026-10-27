@@ -283,8 +283,10 @@ public final class AgentsFeature: NotchFeature {
         Task { [weak self] in
             let read = await Task.detached(priority: .utility) {
                 stale.map { path in
-                    ((try? FileManager.default.attributesOfItem(atPath: path)[.size] as? Int) ?? 0, path,
-                        ChatTitle.read(transcript: path))
+                    (
+                        (try? FileManager.default.attributesOfItem(atPath: path)[.size] as? Int) ?? 0, path,
+                        ChatTitle.read(transcript: path)
+                    )
                 }
             }.value
             guard let self else { return }

@@ -213,10 +213,14 @@ struct NotchView: View {
     private func viorimGlass(_ outline: NotchShape) -> some View {
         let light = viorimLight
         // glass: Frost (244,246,248) in light, Gunmetal (27,31,35) in dark.
-        let tint = light ? Color(red: 244 / 255, green: 246 / 255, blue: 248 / 255)
+        let tint =
+            light
+            ? Color(red: 244 / 255, green: 246 / 255, blue: 248 / 255)
             : Color(red: 27 / 255, green: 31 / 255, blue: 35 / 255)
         // hero-tint: Datum (48,62,80) at 8% in light, steel (127,162,201) at 20% in dark.
-        let glow = light ? Color(red: 48 / 255, green: 62 / 255, blue: 80 / 255).opacity(0.08)
+        let glow =
+            light
+            ? Color(red: 48 / 255, green: 62 / 255, blue: 80 / 255).opacity(0.08)
             : Color(red: 127 / 255, green: 162 / 255, blue: 201 / 255).opacity(0.2)
         BehindWindowBlur(light: light).id(light).transition(.opacity)
         if #available(macOS 26, *) {
