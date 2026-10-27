@@ -33,6 +33,11 @@ public struct AgentSession: Identifiable, Hashable, Sendable {
     public var step: String?
     /// When its current turn started.
     public var workingSince: Date?
+    /// Claude Code's transcript of the session, where its title is read from.
+    public var transcript: String?
+    /// The chat's title, as Claude Code lists it: the name given with /rename, Claude's summary, or the
+    /// first thing you asked. Filled in by `AgentsFeature` from the transcript.
+    public var title: String?
 
     /// How far through its to-do list it is, 0...1, or nil without a list.
     public var progress: Double? {
@@ -63,6 +68,7 @@ public struct AgentSession: Identifiable, Hashable, Sendable {
         todosTotal = text(8).flatMap { Int($0) } ?? 0
         step = text(9)
         workingSince = text(10).flatMap { TimeInterval($0) }.map { Date(timeIntervalSince1970: $0) }
+        transcript = text(11)
     }
 
     public init(
@@ -242,7 +248,8 @@ public final class AgentsFeature: NotchFeature {
         // Waiting ones first, since those need the user; then the latest news.
         found.sort { ($0.state == .waiting ? 1 : 0, $0.updated) > ($1.state == .waiting ? 1 : 0, $1.updated) }
         let before = Dictionary(uniqueKeysWithValues: sessions.map { ($0.id, $0.state) })
-        sessions = found
+        sessions = found.map(withTitle)
+        readTitles(found)
         if announcing, announcesDone {
             // Only a session seen working finishes; one found already done is old news.
             let front = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
@@ -255,6 +262,35 @@ public final class AgentsFeature: NotchFeature {
             }
         }
         showWaiting(Self.waiting(in: found))
+    }
+
+    /// Chat titles by transcript, with the transcript's size when read: read again once it grows.
+    @ObservationIgnored private var titles: [String: (size: Int, title: String?)] = [:]
+
+    private func withTitle(_ session: AgentSession) -> AgentSession {
+        var session = session
+        session.title = session.transcript.flatMap { titles[$0]?.title }
+        return session
+    }
+
+    /// Reads the titles of transcripts that are new or have grown, off the main thread.
+    private func readTitles(_ found: [AgentSession]) {
+        let stale = found.compactMap(\.transcript).filter { path in
+            let size = (try? FileManager.default.attributesOfItem(atPath: path)[.size] as? Int) ?? 0
+            return titles[path]?.size != size
+        }
+        guard !stale.isEmpty else { return }
+        Task { [weak self] in
+            let read = await Task.detached(priority: .utility) {
+                stale.map { path in
+                    ((try? FileManager.default.attributesOfItem(atPath: path)[.size] as? Int) ?? 0, path,
+                        ChatTitle.read(transcript: path))
+                }
+            }.value
+            guard let self else { return }
+            for (size, path, title) in read { self.titles[path] = (size, title) }
+            self.sessions = self.sessions.map(self.withTitle)
+        }
     }
 
     /// The closed notch's reminder that agents are waiting for approval: the project when it's one.

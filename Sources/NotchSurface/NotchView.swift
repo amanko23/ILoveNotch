@@ -44,6 +44,8 @@ struct NotchView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @Environment(\.colorSchemeContrast) private var contrast
+    /// The Mac's appearance, before the notch picks its own below.
+    @Environment(\.colorScheme) private var systemScheme
     @State private var dropTargeted = false
     @State private var justDropped = false
     @State private var slideForward = true
@@ -64,6 +66,8 @@ struct NotchView: View {
             fill(outline, glass: showsGlass(presentation))
             if let tab = presentation.openTab {
                 expanded(tab: tab, pinned: presentation.isPinned)
+                    // Viorim Glass follows the Mac: Frost in light, Gunmetal in dark.
+                    .environment(\.colorScheme, viorimLight ? .light : .dark)
                     .transition(.opacity)
             } else if case .transient(let activity) = presentation {
                 live(activity)
@@ -202,25 +206,41 @@ struct NotchView: View {
     /// (`glass`, 72%; 55% under Liquid Glass on macOS 26, which adds its own depth), the steel light
     /// in the top-left corner (`hero-tint`) and a hairline rim (`glass-rim`) that catches the light
     /// along the bottom edge.
+    /// Viorim Glass in a light-appearance Mac: the kit's Light (Frost) theme.
+    private var viorimLight: Bool { preferences.theme == .viorim && systemScheme == .light }
+
     @ViewBuilder
     private func viorimGlass(_ outline: NotchShape) -> some View {
-        let gunmetal = Color(red: 27 / 255, green: 31 / 255, blue: 35 / 255)
-        let steel = Color(red: 127 / 255, green: 162 / 255, blue: 201 / 255)
-        BehindWindowBlur().transition(.opacity)
+        let light = viorimLight
+        // glass: Frost (244,246,248) in light, Gunmetal (27,31,35) in dark.
+        let tint = light ? Color(red: 244 / 255, green: 246 / 255, blue: 248 / 255)
+            : Color(red: 27 / 255, green: 31 / 255, blue: 35 / 255)
+        // hero-tint: Datum (48,62,80) at 8% in light, steel (127,162,201) at 20% in dark.
+        let glow = light ? Color(red: 48 / 255, green: 62 / 255, blue: 80 / 255).opacity(0.08)
+            : Color(red: 127 / 255, green: 162 / 255, blue: 201 / 255).opacity(0.2)
+        BehindWindowBlur(light: light).id(light).transition(.opacity)
         if #available(macOS 26, *) {
             GlassEffectContainer {
                 Color.clear.glassEffect(.clear, in: outline).glassEffectTransition(.materialize)
             }
-            outline.fill(gunmetal.opacity(0.55)).transition(.opacity)
+            outline.fill(tint.opacity(0.55)).transition(.opacity)
         } else {
-            outline.fill(gunmetal.opacity(0.72)).transition(.opacity)
+            outline.fill(tint.opacity(0.72)).transition(.opacity)
         }
-        RadialGradient(colors: [steel.opacity(0.2), .clear], center: .topLeading, startRadius: 0, endRadius: 320)
+        RadialGradient(colors: [glow, .clear], center: .topLeading, startRadius: 0, endRadius: 320)
             .clipShape(outline)
             .allowsHitTesting(false)
             .transition(.opacity)
-        outline.stroke(Self.viorimRim, lineWidth: 1).transition(.opacity)
+        outline.stroke(light ? Self.viorimRimLight : Self.viorimRim, lineWidth: 1).transition(.opacity)
     }
+
+    /// Light theme's `glass-rim` (Gunmetal at 8%) toward `hero-rim` (Datum at 14%).
+    private static let viorimRimLight = LinearGradient(
+        stops: [
+            .init(color: .clear, location: 0),
+            .init(color: Color(red: 34 / 255, green: 39 / 255, blue: 43 / 255).opacity(0.08), location: 0.3),
+            .init(color: Color(red: 48 / 255, green: 62 / 255, blue: 80 / 255).opacity(0.14), location: 1),
+        ], startPoint: .top, endPoint: .bottom)
 
     /// `glass-rim` (Frost at 10%) brightening to `hero-rim` toward the bottom, away from the screen edge.
     private static let viorimRim = LinearGradient(
@@ -363,7 +383,7 @@ struct NotchView: View {
                 .padding(.trailing, contentPadding.trailing - 22 + 10)
                 .padding(.bottom, 10)
         }
-        .foregroundStyle(.white)
+        .foregroundStyle(.primary)
     }
 
     private static let expandedTopRadius: CGFloat = 10
@@ -456,7 +476,7 @@ struct NotchView: View {
                     // One size and one outline for every tab, as Apple's tab bars keep them: the open
                     // tab stands out by its pill and brightness, never by a bigger or filled glyph.
                     TablerIcon(name: tab.icon)
-                        .foregroundStyle(.white.opacity(lit ? 1 : Self.unlit))
+                        .foregroundStyle(.primary.opacity(lit ? 1 : Self.unlit))
                         .frame(width: tabWidth, height: 26)
                         .contentShape(Rectangle())
                 }
@@ -471,7 +491,7 @@ struct NotchView: View {
             // One capsule travels between tabs, inside the row's glass: a bouncy spring carries it,
             // and a quick stretch-and-settle makes the move read as jelly instead of a jump.
             Capsule()
-                .fill(.white.opacity(drawer ? 0 : 0.16))
+                .fill(.primary.opacity(drawer ? 0 : 0.16))
                 .padding(2)
                 .matchedGeometryEffect(id: selected, in: selection, isSource: false)
                 .keyframeAnimator(initialValue: CGSize(width: 1, height: 1), trigger: selected) { capsule, scale in
@@ -543,7 +563,7 @@ struct NotchView: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .foregroundStyle(.white.opacity(lit ? 1 : Self.unlit))
+        .foregroundStyle(.primary.opacity(lit ? 1 : Self.unlit))
         .help(label)
         .accessibilityLabel(label)
     }
@@ -709,12 +729,15 @@ private struct AccessoryMark: View {
 
 /// What's behind the notch's window, blurred and dark, and live whether or not the window is key.
 private struct BehindWindowBlur: NSViewRepresentable {
+    /// Viorim Glass in a light-appearance Mac blurs in the light material.
+    var light = false
+
     func makeNSView(context: Context) -> NSVisualEffectView {
         let view = PassThroughEffectView()
         view.material = .hudWindow
         view.blendingMode = .behindWindow
         view.state = .active
-        view.appearance = NSAppearance(named: .darkAqua)  // the notch's content is white
+        view.appearance = NSAppearance(named: light ? .aqua : .darkAqua)  // dark unless Viorim's light glass
         return view
     }
 
@@ -737,7 +760,7 @@ private struct GlassPlatter<S: Shape>: View {
         if #available(macOS 26, *), !reduceTransparency, contrast != .increased {
             Color.clear.glassEffect(.regular, in: shape)
         } else {
-            shape.fill(.white.opacity(0.08))
+            shape.fill(.primary.opacity(0.08))
         }
     }
 }
@@ -755,7 +778,7 @@ private struct ResizeGrip: View {
                 strokes.move(to: CGPoint(x: size.width, y: size.height - inset))
                 strokes.addLine(to: CGPoint(x: size.width - inset, y: size.height))
             }
-            context.stroke(strokes, with: .color(.white), style: StrokeStyle(lineWidth: 1.5, lineCap: .round))
+            context.stroke(strokes, with: .color(.primary), style: StrokeStyle(lineWidth: 1.5, lineCap: .round))
         }
         .opacity(active ? 0.95 : hovering ? 0.75 : 0.5)
         .onHover { hovering = $0 }

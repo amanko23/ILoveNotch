@@ -24,9 +24,9 @@ public struct ClaudeSummary: Hashable, Sendable {
         let busy = sessions.filter { $0.state == .working || $0.state == .compacting }
         guard let first = busy.max(by: { ($0.progress ?? -1, $0.updated) < ($1.progress ?? -1, $1.updated) })
         else { return nil }
-        title = busy.count == 1 ? first.project : "\(busy.count) working"
+        title = busy.count == 1 ? first.title ?? first.project : "\(busy.count) working"
         progress = first.progress
-        var label = "Claude is working on \(first.project)"
+        var label = "Claude is working on \(first.title ?? first.project)"
         if first.todosTotal > 0 { label += ", \(first.todosDone) of \(first.todosTotal) done" }
         self.label = label
     }

@@ -266,7 +266,8 @@ public struct AgentHooks: Sendable {
     /// JSON, since macOS has no `jq`. It never blocks the agent and always exits 0.
     ///
     /// The session file, one field per line: state, folder, bundle ID, TERM_PROGRAM, pid, message,
-    /// tool, to-dos done, to-dos in all, current step, and when it started working (Unix time).
+    /// tool, to-dos done, to-dos in all, current step, when it started working (Unix time), and the
+    /// path of the session's transcript, where the app reads its title (the path only, never its text).
     static let scriptSource = #"""
         #!/bin/sh
         # NotchDeck agent status, run by Claude Code's and Codex's hooks. NotchDeck adds the hooks
@@ -363,7 +364,7 @@ public struct AgentHooks: Sendable {
         tmp=$(mktemp "$dir/.$tool.XXXXXX") || exit 0
         {
             printf '%s\n' "$state" "$(field cwd)" "${__CFBundleIdentifier:-}" "${TERM_PROGRAM:-}" "$PPID"
-            printf '%s\n' "$message" "$asked" "$finished" "$total" "$step" "$since"
+            printf '%s\n' "$message" "$asked" "$finished" "$total" "$step" "$since" "$(field transcript_path)"
         } >"$tmp"
         mv -f "$tmp" "$file"
         exit 0

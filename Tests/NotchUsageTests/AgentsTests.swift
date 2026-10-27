@@ -328,3 +328,22 @@ struct AgentsFeatureTests {
         #expect(AgentSession.workingLine(deck, now: since + 4 * 60 + 5) == "Working 4m · Running tests · 2 of 5")
     }
 }
+
+struct ChatTitleTests {
+    private func title(_ lines: [String]) -> String? {
+        ChatTitle.title(in: Data(lines.joined(separator: "\n").utf8))
+    }
+
+    @Test func aRenamedChatKeepsItsNameOverTheSummaryAndFirstMessage() {
+        let user = #"{"type":"user","message":{"role":"user","content":"Fix the login bug\nmore detail"}}"#
+        let command = #"{"type":"user","message":{"role":"user","content":"<command-name>/clear</command-name>"}}"#
+        let blocks = #"{"type":"user","message":{"role":"user","content":[{"type":"text","text":"Ship it"}]}}"#
+        #expect(title([command, user]) == "Fix the login bug", "the first thing asked, one line")
+        #expect(title([blocks]) == "Ship it")
+        let summary = #"{"type":"summary","summary":"Login bug fix","leafUuid":"x"}"#
+        #expect(title([user, summary]) == "Login bug fix")
+        let renamed = #"{"type":"custom-title","customTitle":"Auth rewrite","sessionId":"s"}"#
+        #expect(title([user, renamed, summary]) == "Auth rewrite")
+        #expect(title(["not json"]) == nil)
+    }
+}

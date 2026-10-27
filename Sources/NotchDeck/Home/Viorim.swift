@@ -1,38 +1,56 @@
 // SPDX-License-Identifier: MIT
+import AppKit
 import SwiftUI
 
-/// The Viorim OS design kit's dark theme (Gunmetal), as NotchDeck draws on its glass: role colours,
+/// The Viorim OS design kit's Light (Frost) and Dark (Gunmetal) themes, as NotchDeck draws on its glass: role colours,
 /// radii, type roles and the two springs. Values are the kit's `tokens.json`; fonts are the
 /// system's in the kit's roles (thin numbers, monospaced capital labels) until its typefaces are
 /// licensed for this project.
 enum Viorim {
-    // MARK: Colour (dark)
+    // MARK: Colour: Light (Frost) and Dark (Gunmetal), following the notch's appearance
 
-    static let surface = rgb(0x1B1F23)
-    static let surfaceRaised = rgb(0x252A30)
-    static let surfaceSunken = rgb(0x0C0E10)
-    static let ink = rgb(0xE9EDF0)
-    static let ink2 = rgb(0xB3BCC5)
-    static let ink3 = rgb(0x8E98A2)
-    static let separator = rgb(0x2E353C)
+    static let surface = pair(0xF4F6F8, 0x1B1F23)
+    static let surfaceRaised = pair(0xFFFFFF, 0x252A30)
+    static let surfaceSunken = pair(0xD5DCE2, 0x0C0E10)
+    static let ink = pair(0x22272B, 0xE9EDF0)
+    static let ink2 = pair(0x4F5862, 0xB3BCC5)
+    static let ink3 = pair(0x6B747E, 0x8E98A2)
+    static let separator = pair(0xCDD5DC, 0x2E353C)
     /// The one interactive accent: progress, selection, the working dot.
-    static let accent = rgb(0x9DB2CB)
-    /// The Frost capsule of the one primary action.
-    static let action = rgb(0xE2E8EC)
-    static let onAction = rgb(0x22272B)
-    static let highlight = rgb(0x2C3E55)
-    static let danger = rgb(0xFF8B7E)
-    static let dangerSoft = rgb(0x3B1D1A)
-    static let warning = rgb(0xF2B25C)
-    static let warningSoft = rgb(0x3A2A12)
-    static let success = rgb(0x6FCF97)
-    static let successSoft = rgb(0x16301F)
-    static let info = rgb(0x8FB6E0)
-    static let infoSoft = rgb(0x1A2938)
-    static let glassRim = rgb(0xE9EDF0).opacity(0.1)
-    static let heroTint = rgb(0x7FA2C9).opacity(0.2)
-    static let heroRim = rgb(0x9DB2CB).opacity(0.28)
-    static let glowSteel = rgb(0x7FA2C9).opacity(0.38)
+    static let accent = pair(0x303E50, 0x9DB2CB)
+    /// The capsule of the one primary action: Gunmetal in light, Frost in dark.
+    static let action = pair(0x22272B, 0xE2E8EC)
+    static let onAction = pair(0xFFFFFF, 0x22272B)
+    static let highlight = pair(0xC8D6E8, 0x2C3E55)
+    static let danger = pair(0xB42318, 0xFF8B7E)
+    static let dangerSoft = pair(0xFBE7E5, 0x3B1D1A)
+    static let warning = pair(0x8A5300, 0xF2B25C)
+    static let warningSoft = pair(0xFCEFD9, 0x3A2A12)
+    static let success = pair(0x1F7A4A, 0x6FCF97)
+    static let successSoft = pair(0xE3F2E9, 0x16301F)
+    static let info = pair(0x2F5D8A, 0x8FB6E0)
+    static let infoSoft = pair(0xE1EAF4, 0x1A2938)
+    static let glassRim = pair(0x22272B, 0xE9EDF0, light: 0.08, dark: 0.1)
+    static let heroTint = pair(0x303E50, 0x7FA2C9, light: 0.08, dark: 0.2)
+    static let heroRim = pair(0x303E50, 0x9DB2CB, light: 0.14, dark: 0.28)
+    static let glowSteel = pair(0x303E50, 0x7FA2C9, light: 0.18, dark: 0.38)
+
+    /// A token's light and dark values, resolved against the appearance the notch draws in.
+    static func pair(_ light: UInt32, _ dark: UInt32, light lightAlpha: Double = 1, dark darkAlpha: Double = 1)
+        -> Color
+    {
+        Color(
+            nsColor: NSColor(name: nil) { appearance in
+                let isDark = appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
+                return nsColor(isDark ? dark : light, alpha: isDark ? darkAlpha : lightAlpha)
+            })
+    }
+
+    static func nsColor(_ hex: UInt32, alpha: Double) -> NSColor {
+        NSColor(
+            srgbRed: Double(hex >> 16 & 0xFF) / 255, green: Double(hex >> 8 & 0xFF) / 255,
+            blue: Double(hex & 0xFF) / 255, alpha: alpha)
+    }
 
     // MARK: Shape: concentric inside the notch's 26 pt corners
 

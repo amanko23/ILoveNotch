@@ -95,7 +95,7 @@ private struct ClaudePeek: View {
         let waiting = session.state == .waiting
         return HStack(spacing: 8) {
             VStack(alignment: .leading, spacing: 2) {
-                Text(session.project).font(.system(size: 12, weight: .semibold)).lineLimit(1)
+                Text(session.title ?? session.project).font(.system(size: 12, weight: .semibold)).lineLimit(1)
                 TimelineView(.everyMinute) { context in
                     Text("\(Deck.stateWord(session)) · \(Deck.detail(session, now: context.date))")
                 }

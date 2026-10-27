@@ -66,7 +66,7 @@ private struct ClaudeTile: View {
                 let waiting = session.state == .waiting
                 HStack(spacing: 6) {
                     StatusChip(Deck.stateWord(session), tone: Deck.tone(session))
-                    Text(session.project).font(Viorim.body).foregroundStyle(Viorim.ink).lineLimit(1)
+                    Text(session.title ?? session.project).font(Viorim.body).foregroundStyle(Viorim.ink).lineLimit(1)
                     Spacer(minLength: 0)
                     if session.state == .working || session.state == .compacting { WorkingDot() }
                 }
@@ -263,8 +263,8 @@ enum Deck {
             let when = session.updated.formatted(.relative(presentation: .named, unitsStyle: .abbreviated))
             return "Finished \(when)"
         case .working:
-            var parts: [String] = []
-            if let step = session.step { parts.append(step) }
+            // The chat's title is on the line above; the project, how far along, and how long here.
+            var parts: [String] = session.title == nil ? [] : [session.project]
             if session.todosTotal > 0 { parts.append("\(session.todosDone) of \(session.todosTotal)") }
             if let since = session.workingSince, let elapsed = elapsed(since: since, now: now) { parts.append(elapsed) }
             return parts.isEmpty ? "Working on it" : parts.joined(separator: " · ")

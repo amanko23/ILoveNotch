@@ -221,7 +221,7 @@ struct HomeDataTests {
             id: "claude-1", tool: .claude, state: .working, project: "deck", updated: since, todosDone: 2,
             todosTotal: 5, step: "Running tests", workingSince: since)
         #expect(Deck.headline(working) == "Working · deck")
-        #expect(Deck.detail(working, now: since + 65 * 60) == "Running tests · 2 of 5 · 1h 5m")
+        #expect(Deck.detail(working, now: since + 65 * 60) == "2 of 5 · 1h 5m")
         let fresh = AgentSession(id: "claude-2", tool: .claude, state: .working, project: "x", updated: since)
         #expect(Deck.detail(fresh, now: since) == "Working on it")
         #expect(Deck.clock(24 * 60 + 59.2) == "25:00" && Deck.clock(3725) == "1:02:05")

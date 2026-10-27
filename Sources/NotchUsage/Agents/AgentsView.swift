@@ -59,7 +59,7 @@ struct AgentsView: View {
                 Text(session.project).font(.callout.weight(.medium)).lineLimit(1)
                 status(session)
                     .font(.caption)
-                    .foregroundStyle(waiting ? .orange : .white.opacity(0.55))
+                    .foregroundStyle(waiting ? Color.orange : Color.primary.opacity(0.55))
                     .lineLimit(1)
                 if let progress = session.progress, session.state != .done {
                     let tint = waiting ? Color.orange : ProviderStyle.of(session.tool.rawValue).start
@@ -131,7 +131,7 @@ public struct AgentProgressBar: View {
 
     public var body: some View {
         Capsule()
-            .fill(.white.opacity(0.15))
+            .fill(.primary.opacity(0.15))
             .frame(height: 4)
             .overlay(alignment: .leading) {
                 GeometryReader { track in
