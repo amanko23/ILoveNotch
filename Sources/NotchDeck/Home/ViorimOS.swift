@@ -1,86 +1,68 @@
 // SPDX-License-Identifier: MIT
 import AppKit
 import Observation
+import WebKit
 
-/// Viorim OS from the notch: what's waiting for you there, and a way in. It reads
-/// `GET <address>/api/notch` once a minute while Home is on screen, a small JSON object Viorim OS
-/// can serve: `{"waiting": 7, "reviews": 3, "approvals": 2, "quotes": 2}` (every field optional).
-/// Without it, the tile still opens Viorim OS.
+/// The web apps used every day, Viorim OS and the agents' dashboards, each in a NotchDeck window
+/// of its own. They share WebKit's persistent store, so a sign-in is remembered across launches.
 @MainActor
 @Observable
-public final class ViorimOS {
-    public struct Status: Decodable, Equatable, Sendable {
-        public var waiting: Int?
-        public var reviews: Int?
-        public var approvals: Int?
-        public var quotes: Int?
-
-        /// Everything waiting: the total Viorim OS gave, or the sum of its parts.
-        public var total: Int? {
-            waiting ?? [reviews, approvals, quotes].compactMap { $0 }.reduce(nil) { ($0 ?? 0) + $1 }
-        }
-
-        /// "3 reviews · 2 approvals · 2 quotes".
-        public var breakdown: String? {
-            let parts = [(reviews, "review"), (approvals, "approval"), (quotes, "quote")].compactMap { count, noun in
-                count.map { "\($0) \(noun)\($0 == 1 ? "" : "s")" }
-            }
-            return parts.isEmpty ? nil : parts.joined(separator: " · ")
-        }
+public final class WebApps {
+    public struct App: Identifiable, Hashable, Sendable {
+        public var id: String
+        public var name: String
+        public var symbol: String
+        public var address: String
     }
 
-    public private(set) var status: Status?
-    /// Whether the last read reached Viorim OS.
-    public private(set) var reachable: Bool?
-    /// Where Viorim OS runs: the app's web address.
-    public var address: String {
-        didSet { defaults.set(address, forKey: Key.address) }
+    /// Viorim OS's address, changeable in Settings › Home.
+    public var viorimAddress: String {
+        didSet { defaults.set(viorimAddress, forKey: Key.viorim) }
     }
     @ObservationIgnored private let defaults: UserDefaults
-    @ObservationIgnored private var poller: Task<Void, Never>?
+    @ObservationIgnored private var windows: [String: NSWindow] = [:]
 
     public init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
-        address = defaults.string(forKey: Key.address) ?? "http://localhost:3000"
+        viorimAddress = defaults.string(forKey: Key.viorim) ?? "https://app.viorim.com/"
     }
 
-    public var url: URL? { URL(string: address.trimmingCharacters(in: .whitespaces)) }
-
-    public func open() {
-        guard let url else { return }
-        NSWorkspace.shared.open(url)
+    public var apps: [App] {
+        [
+            App(id: "viorim", name: "Viorim OS", symbol: "square.grid.2x2", address: viorimAddress),
+            App(id: "agents", name: "Agents", symbol: "person.3", address: "https://agents-umber-gamma.vercel.app/"),
+            App(id: "holdings", name: "Holdings", symbol: "chart.pie", address: "https://holdings-agent.vercel.app/"),
+        ]
     }
 
-    public func start() {
-        guard poller == nil else { return }
-        poller = Task { [weak self] in
-            while !Task.isCancelled {
-                guard let endpoint = self?.url?.appending(path: "api/notch") else { return }
-                let status = await Self.fetch(endpoint)
-                guard let self, !Task.isCancelled else { return }
-                self.reachable = status != nil
-                self.status = status
-                do { try await Task.sleep(for: .seconds(60), tolerance: .seconds(5)) } catch { return }
-            }
+    /// Brings the app's window forward, opening it the first time; it stays signed in.
+    public func open(_ app: App) {
+        if let window = windows[app.id] {
+            NSApp.activate()
+            window.makeKeyAndOrderFront(nil)
+            return
         }
-    }
-
-    public func stop() {
-        poller?.cancel()
-        poller = nil
-    }
-
-    nonisolated static func fetch(_ endpoint: URL) async -> Status? {
-        var request = URLRequest(url: endpoint, timeoutInterval: 5)
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
-        guard let (data, response) = try? await URLSession.shared.data(for: request),
-            (response as? HTTPURLResponse)?.statusCode == 200
-        else { return nil }
-        return try? JSONDecoder().decode(Status.self, from: data)
+        guard let url = URL(string: app.address.trimmingCharacters(in: .whitespaces)) else { return }
+        let configuration = WKWebViewConfiguration()
+        configuration.websiteDataStore = .default()  // persistent: cookies and sign-ins survive relaunches
+        let webView = WKWebView(frame: .zero, configuration: configuration)
+        webView.allowsBackForwardNavigationGestures = true
+        webView.load(URLRequest(url: url))
+        let window = NSWindow(
+            contentRect: CGRect(x: 0, y: 0, width: 1200, height: 800),
+            styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
+        window.title = app.name
+        window.contentView = webView
+        window.isReleasedWhenClosed = false
+        window.setFrameAutosaveName("NotchDeck.web.\(app.id)")
+        if !window.setFrameUsingName("NotchDeck.web.\(app.id)") { window.center() }
+        windows[app.id] = window
+        NSApp.activate()
+        window.makeKeyAndOrderFront(nil)
     }
 
     private enum Key {
-        static let address = "viorimOS.address"
+        static let viorim = "webApps.viorimAddress"
     }
 }
 

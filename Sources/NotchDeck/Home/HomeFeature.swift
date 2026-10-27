@@ -31,7 +31,7 @@ public final class HomeFeature: NotchFeature {
     public let focus = FocusShortcuts()
     public let monitor: SystemMonitor
     public let agents: AgentsFeature
-    public let viorimOS: ViorimOS
+    public let webApps: WebApps
 
     /// Per-feature setting: the agent projects that get a page each in the Claude peek, by folder
     /// name. Sessions in any other folder share an "Other" page.
@@ -65,7 +65,7 @@ public final class HomeFeature: NotchFeature {
         pomodoro = Pomodoro(defaults: defaults)
         weather = WeatherModel(defaults: defaults)
         agenda = Agenda(eventStore: eventStore)
-        viorimOS = ViorimOS(defaults: defaults)
+        webApps = WebApps(defaults: defaults)
         agentProjects = defaults.stringArray(forKey: Key.agentProjects) ?? Self.defaultAgentProjects
         opensOnHome = defaults.object(forKey: Key.opensOnHome) as? Bool ?? true
         showsClaudeInClosedNotch = defaults.object(forKey: Key.showsClaude) as? Bool ?? true
@@ -92,13 +92,11 @@ public final class HomeFeature: NotchFeature {
     private func update() {
         if phase == .foreground {
             monitor.start(for: "home")
-            viorimOS.start()
             agenda.start()
             appearance.startObserving()
             weather.refreshIfStale()
         } else {
             monitor.stop(for: "home")
-            viorimOS.stop()
             agenda.stop()
             appearance.stopObserving()
             peek = nil

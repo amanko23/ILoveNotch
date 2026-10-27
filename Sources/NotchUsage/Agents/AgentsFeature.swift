@@ -57,7 +57,10 @@ public struct AgentSession: Identifiable, Hashable, Sendable {
         }
         self.id = id
         self.tool = tool
-        self.state = state
+        // A session whose Stop never arrived (closed terminal, crash) would read as busy forever: a
+        // compaction that's quiet for 3 minutes, or work quiet for 15, is over.
+        let quiet = Date.now.timeIntervalSince(updated)
+        self.state = (state == .compacting && quiet > 180) || (state == .working && quiet > 900) ? .idle : state
         project = text(1).map { URL(filePath: $0).lastPathComponent } ?? tool.name
         app = text(2) ?? text(3).flatMap { Self.terminals[$0] }
         process = text(4).flatMap { pid_t($0) }

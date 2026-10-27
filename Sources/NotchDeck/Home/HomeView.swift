@@ -29,7 +29,7 @@ struct HomeView: View {
         VStack(spacing: 6) {
             HStack(spacing: 6) {
                 ClaudeTile(home: home).layoutPriority(1)
-                ViorimTile(home: home)
+                AppsTile(home: home)
             }
             .frame(maxHeight: .infinity)
             HStack(spacing: 6) {
@@ -167,31 +167,24 @@ private struct SystemTile: View {
     }
 }
 
-/// Viorim OS: what's waiting for you there, and a way in.
-private struct ViorimTile: View {
+/// Viorim OS and the agents' dashboards, each a click away in a window that stays signed in.
+private struct AppsTile: View {
     let home: HomeFeature
 
     var body: some View {
-        let viorim = home.viorimOS
-        Tile(title: "Viorim OS", symbol: "square.grid.2x2", tint: Viorim.accent, home: home, opens: .viorim) {
-            if let total = viorim.status?.total {
-                HStack(alignment: .firstTextBaseline, spacing: 6) {
-                    Text("\(total)").font(Viorim.metric(26)).monospacedDigit().foregroundStyle(Viorim.ink)
-                    Text("waiting for you").font(Viorim.footnote).foregroundStyle(Viorim.ink2)
-                }
-                if let breakdown = viorim.status?.breakdown { Detail(breakdown) }
-            } else {
-                Detail(viorim.reachable == false ? "Not running at \(viorim.address)" : "RFQs, plans, quotes")
+        let web = home.webApps
+        Tile(title: "Apps", symbol: "square.grid.2x2", tint: Viorim.accent, home: home, opens: .viorim) {
+            ForEach(web.apps) { app in
+                PillButton(app.name, prominent: app.id == "viorim") { web.open(app) }
             }
             Spacer(minLength: 0)
-            PillButton("Open", prominent: true) { viorim.open() }
         }
     }
 }
 
 // MARK: Footer
 
-/// The weather, the light/dark switch, and Switch User, along the bottom.
+/// The weather on the left; the date, time and light/dark switch together on the right.
 private struct HomeFooter: View {
     let home: HomeFeature
 
@@ -199,14 +192,15 @@ private struct HomeFooter: View {
         HStack(spacing: 0) {
             weather
             Spacer(minLength: 4)
-            TimelineView(.everyMinute) { context in
+            HStack(spacing: 8) {
+                TimelineView(.everyMinute) { context in
                 Text(IST.date(context.date) + " · " + IST.time(context.date) + " IST")
                     .font(Viorim.footnote)
                     .monospacedDigit()
                     .foregroundStyle(Viorim.ink2)
+                }
+                appearance
             }
-            Spacer(minLength: 4)
-            appearance
         }
         .frame(height: 22)
     }

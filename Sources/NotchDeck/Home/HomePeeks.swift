@@ -70,7 +70,7 @@ struct PeekView: View {
         case .system: SystemPeek(monitor: home.monitor)
         case .weather: WeatherPeek(weather: home.weather, openSettings: { home.openSettings?() })
         case .user: UserPeek()
-        case .viorim: ViorimPeek(viorim: home.viorimOS)
+        case .viorim: AppsPeek(web: home.webApps)
         }
     }
 }
@@ -416,30 +416,16 @@ private struct WeatherPeek: View {
 
 // MARK: Viorim OS
 
-private struct ViorimPeek: View {
-    let viorim: ViorimOS
+private struct AppsPeek: View {
+    let web: WebApps
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            if let status = viorim.status {
-                HStack(spacing: 6) {
-                    Stat(value: status.total.map { "\($0)" } ?? "—", label: "waiting for you")
-                    Stat(value: status.reviews.map { "\($0)" } ?? "—", label: "reviews")
-                    Stat(value: status.approvals.map { "\($0)" } ?? "—", label: "approvals")
-                    Stat(value: status.quotes.map { "\($0)" } ?? "—", label: "quotes")
-                }
-            } else {
-                Text(
-                    viorim.reachable == false
-                        ? "Viorim OS isn't answering at \(viorim.address). Start it, or change the address in "
-                            + "Settings › Home."
-                        : "Counts appear here once Viorim OS serves /api/notch."
-                )
-                .font(Viorim.footnote)
-                .foregroundStyle(Viorim.ink2)
-                .fixedSize(horizontal: false, vertical: true)
+            ForEach(web.apps) { app in
+                PillButton(app.name, prominent: app.id == "viorim") { web.open(app) }
             }
-            PillButton("Open Viorim OS", prominent: true) { viorim.open() }
+            Spacer(minLength: 0)
+            Detail("Each opens in its own window and stays signed in.")
         }
     }
 }

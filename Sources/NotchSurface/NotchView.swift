@@ -208,7 +208,8 @@ struct NotchView: View {
             }
             // A trace of black stays under the glass: the window server sends a click to the window
             // below wherever this one draws nothing, which closed the notch mid-click.
-            outline.fill(.black).opacity(glass ? 0.01 : 1)
+            // Under Viorim's open notch the black stays a trace too, or it would cover the canvas above.
+            outline.fill(.black).opacity(glass || viorimOpen ? 0.01 : 1)
             if glass, metrics.notch != nil {
                 Self.shape(for: .compact, on: metrics).fill(.black)
                     .frame(width: metrics.compactSize.width, height: metrics.compactSize.height)
@@ -220,6 +221,9 @@ struct NotchView: View {
     /// (`glass`, 72%; 55% under Liquid Glass on macOS 26, which adds its own depth), the steel light
     /// in the top-left corner (`hero-tint`) and a hairline rim (`glass-rim`) that catches the light
     /// along the bottom edge.
+    /// The open notch in the Viorim theme, which draws its own glass or canvas.
+    private var viorimOpen: Bool { preferences.theme == .viorim && engine.state.presentation.openTab != nil }
+
     /// Viorim Glass in a light-appearance Mac: the kit's Light (Frost) theme.
     private var viorimLight: Bool { preferences.theme == .viorim && systemScheme == .light }
 

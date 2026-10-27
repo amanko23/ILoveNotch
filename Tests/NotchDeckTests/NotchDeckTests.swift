@@ -290,12 +290,17 @@ struct HomeRenderTests {
     }
 }
 
-struct ViorimOSTests {
-    @Test func theStatusAddsUpWhatsWaiting() throws {
-        let json = #"{"reviews":3,"approvals":2,"quotes":1}"#
-        let status = try JSONDecoder().decode(ViorimOS.Status.self, from: Data(json.utf8))
-        #expect(status.total == 6 && status.breakdown == "3 reviews · 2 approvals · 1 quote")
-        #expect(ViorimOS.Status(waiting: 9).total == 9)
+@MainActor
+struct WebAppsTests {
+    @Test func theAppsOpenTheirOwnAddresses() throws {
+        let defaults = try #require(UserDefaults(suiteName: "WebAppsTests"))
+        defaults.removePersistentDomain(forName: "WebAppsTests")
+        let addresses = WebApps(defaults: defaults).apps.map(\.address)
+        #expect(
+            addresses == [
+                "https://app.viorim.com/", "https://agents-umber-gamma.vercel.app/",
+                "https://holdings-agent.vercel.app/",
+            ])
     }
 
     @Test func timesAreInIndiaStandardTime() {

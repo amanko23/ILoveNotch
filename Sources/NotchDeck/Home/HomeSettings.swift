@@ -15,7 +15,7 @@ private struct HomeSettings: View {
     var body: some View {
         @Bindable var pomodoro = home.pomodoro
         @Bindable var weather = home.weather
-        @Bindable var viorim = home.viorimOS
+        @Bindable var web = home.webApps
         Group {
             Section {
                 Toggle(isOn: $home.opensOnHome) {
@@ -29,12 +29,12 @@ private struct HomeSettings: View {
             }
             Section("Viorim OS and agents") {
                 LabeledContent {
-                    TextField("Address", text: $viorim.address, prompt: Text("http://localhost:3000"))
+                    TextField("Address", text: $web.viorimAddress, prompt: Text("https://app.viorim.com/"))
                         .labelsHidden()
                         .frame(maxWidth: 220)
                 } label: {
                     Text("Viorim OS address")
-                    Text("The tile opens it, and shows what's waiting when it serves /api/notch.")
+                    Text("Opens in its own window, which stays signed in.")
                 }
                 LabeledContent {
                     TextField("Agents", text: projects).labelsHidden().frame(maxWidth: 260)
