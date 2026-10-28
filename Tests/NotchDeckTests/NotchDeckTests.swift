@@ -322,6 +322,7 @@ struct AppsSummaryTests {
     }
 }
 
+@MainActor
 struct HomeTileOrderTests {
     @Test func aStoredOrderKeepsKnownTilesAndAddsMissingOnes() {
         let order = HomeFeature.order(["takeaways", "bogus", "claude", "claude"])
