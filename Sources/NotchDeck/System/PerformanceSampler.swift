@@ -14,7 +14,7 @@ public final class PerformanceSampler {
     public private(set) var gpu: [Double] = []
     public private(set) var temperature: [Double] = []
     /// How many readings each graph keeps.
-    public static let capacity = 60
+    public nonisolated static let capacity = 60
     @ObservationIgnored private var sampler: Task<Void, Never>?
     @ObservationIgnored private var lastTicks: CPUTicks?
     @ObservationIgnored private var smc: SMC?
