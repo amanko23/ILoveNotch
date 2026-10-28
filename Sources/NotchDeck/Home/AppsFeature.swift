@@ -44,7 +44,9 @@ public final class AppsFeature: NotchFeature {
     }
 
     public enum Load: Equatable, Sendable {
-        case loading, loaded(Summary), unavailable
+        case loading
+        case loaded(Summary)
+        case unavailable
     }
 
     public let id = FeatureID.apps

@@ -195,7 +195,8 @@ public final class PanelCoordinator {
             // shows on it (a zoomed or tiled window on another desktop); only real full screen hides it.
             // NotchDeck: and only when asked to; a window list can't tell full screen from a big window
             // on a second display reliably, so by default the notch never hides.
-            let filled = preferences.hidesInFullScreen && Self.isFilled(display, by: windows)
+            let filled =
+                preferences.hidesInFullScreen && Self.isFilled(display, by: windows)
                 && !Self.showsMenuBar(display, in: windows)
             controller.engine.send(filled ? .suspend(.fullScreen) : .resume(.fullScreen))
         }
