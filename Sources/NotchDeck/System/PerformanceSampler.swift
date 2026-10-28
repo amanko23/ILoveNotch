@@ -56,15 +56,17 @@ public final class PerformanceSampler {
     /// The busiest GPU's utilization from the accelerator's own statistics, nil where it has none.
     nonisolated static func gpuLoad() -> Double? {
         var iterator: io_iterator_t = 0
-        guard IOServiceGetMatchingServices(kIOMainPortDefault, IOServiceMatching("IOAccelerator"), &iterator)
-            == KERN_SUCCESS
+        guard
+            IOServiceGetMatchingServices(kIOMainPortDefault, IOServiceMatching("IOAccelerator"), &iterator)
+                == KERN_SUCCESS
         else { return nil }
         defer { IOObjectRelease(iterator) }
         var best: Double?
         var service = IOIteratorNext(iterator)
         while service != 0 {
-            let stats = IORegistryEntryCreateCFProperty(
-                service, "PerformanceStatistics" as CFString, kCFAllocatorDefault, 0)?
+            let stats =
+                IORegistryEntryCreateCFProperty(
+                    service, "PerformanceStatistics" as CFString, kCFAllocatorDefault, 0)?
                 .takeRetainedValue() as? [String: Any]
             let value = (stats?["Device Utilization %"] ?? stats?["GPU Activity(%)"]) as? NSNumber
             if let value { best = max(best ?? 0, min(100, value.doubleValue)) }

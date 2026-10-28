@@ -53,9 +53,10 @@ struct Sparkline: View {
                         path.addLine(to: CGPoint(x: points[points.count - 1].x, y: geometry.size.height))
                         path.closeSubpath()
                     }
-                    .fill(LinearGradient(
-                        colors: [Viorim.accent.opacity(0.28), Viorim.accent.opacity(0)], startPoint: .top,
-                        endPoint: .bottom))
+                    .fill(
+                        LinearGradient(
+                            colors: [Viorim.accent.opacity(0.28), Viorim.accent.opacity(0)], startPoint: .top,
+                            endPoint: .bottom))
                     Path { path in path.addLines(points) }
                         .stroke(Viorim.accent, style: StrokeStyle(lineWidth: 1.4, lineCap: .round, lineJoin: .round))
                 }
