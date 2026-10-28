@@ -58,6 +58,7 @@ extension FeatureID {
         case .mirror: "device-computer-camera"
         case .usage: "gauge"
         case .agents: "terminal-2"
+        case .apps: "layout-grid"
         case .system: "cpu"
         }
     }

@@ -128,6 +128,12 @@ public final class NotchPreferences {
         didSet { defaults.set(showOnAllDisplays, forKey: Key.showOnAllDisplays) }
     }
 
+    /// NotchDeck: hide the notch while a full-screen app covers its display. Off by default, so the
+    /// notch stays on every display and desktop.
+    public var hidesInFullScreen: Bool {
+        didSet { defaults.set(hidesInFullScreen, forKey: Key.hidesInFullScreen) }
+    }
+
     /// Displays without a notch that show the floating pill, by display UUID; the rest get a notch.
     public private(set) var pillDisplays: Set<String> {
         didSet { defaults.set(pillDisplays.sorted(), forKey: Key.pillDisplays) }
@@ -252,6 +258,7 @@ public final class NotchPreferences {
         // Nothing stored yet means a first launch: the default drawer.
         drawerOnly = defaults.object(forKey: Key.drawerOnly) == nil ? drawerByDefault : features(Key.drawerOnly)
         showOnAllDisplays = defaults.bool(forKey: Key.showOnAllDisplays)
+        hidesInFullScreen = defaults.bool(forKey: Key.hidesInFullScreen)
         pillDisplays = Set(defaults.stringArray(forKey: Key.pillDisplays) ?? [])
         animationStyle = defaults.string(forKey: Key.animationStyle).flatMap(NotchAnimationStyle.init) ?? .spring
         theme = defaults.string(forKey: Key.theme).flatMap(NotchTheme.init) ?? .black
@@ -335,6 +342,7 @@ public final class NotchPreferences {
         tabOrder = available
         drawerOnly = drawerByDefault
         showOnAllDisplays = false
+        hidesInFullScreen = false
         pillDisplays = []
         animationStyle = .spring
         theme = .black
@@ -353,6 +361,7 @@ public final class NotchPreferences {
         static let drawerOnly = "drawerOnly"
         static let seenFeatures = "seenFeatures"
         static let showOnAllDisplays = "showOnAllDisplays"
+        static let hidesInFullScreen = "hidesInFullScreen"
         static let pillDisplays = "pillDisplays"
         static let animationStyle = "animationStyle"
         static let theme = "theme"

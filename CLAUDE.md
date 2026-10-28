@@ -51,5 +51,6 @@ event name can invalidate the user's settings file.
 ## Privacy
 
 No accounts, no telemetry. Weather calls api.open-meteo.com with coordinates rounded to 0.1°.
-Nothing else leaves the Mac. Never store or handle passwords (Switch User hands off to the login
+The Apps tab asks your own sites (Viorim OS and the agents) for `/api/notch` with their saved
+sign-in, only while it is on screen. Nothing else leaves the Mac. Never store or handle passwords (Switch User hands off to the login
 window).

@@ -308,3 +308,15 @@ struct WebAppsTests {
         #expect(IST.time(noonUTC) == "17:30" && IST.date(noonUTC) == "27 Oct 2026")
     }
 }
+
+struct AppsSummaryTests {
+    @Test func aSummaryReadsTakeawaysAndTodosInEitherShape() throws {
+        let json = #"{"takeaways":["NAV up 2%"],"todos":["Call Ravi",{"title":"Send deck","done":true}]}"#
+        let summary = try JSONDecoder().decode(AppsFeature.Summary.self, from: Data(json.utf8))
+        #expect(summary.takeaways == ["NAV up 2%"])
+        #expect(summary.todos.map(\.title) == ["Call Ravi", "Send deck"] && summary.todos.map(\.done) == [false, true])
+        #expect(
+            AppsFeature.summaryURL("https://holdings-agent.vercel.app/")?.absoluteString
+                == "https://holdings-agent.vercel.app/api/notch")
+    }
+}

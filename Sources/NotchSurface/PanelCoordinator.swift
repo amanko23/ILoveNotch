@@ -16,6 +16,7 @@ public final class PanelCoordinator {
     /// Ongoing activities by the feature that raised them, oldest first.
     private var ongoing: [(feature: FeatureID, activity: Activity)] = []
     private var showingAllDisplays = false
+    private var hidingInFullScreen = false
     /// The displays that had the pill when the notches were last built.
     private var builtPills: Set<String> = []
     private var observers: [(center: NotificationCenter, token: NSObjectProtocol)] = []
@@ -38,6 +39,10 @@ public final class PanelCoordinator {
             if preferences.showOnAllDisplays != showingAllDisplays || preferences.pillDisplays != builtPills {
                 showingAllDisplays = preferences.showOnAllDisplays
                 rebuild()
+            }
+            if preferences.hidesInFullScreen != hidingInFullScreen {
+                hidingInFullScreen = preferences.hidesInFullScreen
+                hideUnderFullScreen()
             }
             broadcast(.setTabs(tabs))
             broadcast(.setOngoing(shownOngoing))
@@ -188,7 +193,10 @@ public final class PanelCoordinator {
             let display = CGDisplayBounds(controller.displayID)
             // NotchDeck: a window as big as the display isn't full screen while the menu bar still
             // shows on it (a zoomed or tiled window on another desktop); only real full screen hides it.
-            let filled = Self.isFilled(display, by: windows) && !Self.showsMenuBar(display, in: windows)
+            // NotchDeck: and only when asked to; a window list can't tell full screen from a big window
+            // on a second display reliably, so by default the notch never hides.
+            let filled = preferences.hidesInFullScreen && Self.isFilled(display, by: windows)
+                && !Self.showsMenuBar(display, in: windows)
             controller.engine.send(filled ? .suspend(.fullScreen) : .resume(.fullScreen))
         }
     }

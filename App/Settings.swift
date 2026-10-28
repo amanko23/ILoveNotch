@@ -156,6 +156,7 @@ extension SettingsSelection.Page {
             case .mirror: (feature.symbol, .green)
             case .usage: (feature.symbol, .purple)
             case .agents: (feature.symbol, .gray)
+            case .apps: (feature.symbol, .blue)
             case .system: ("bolt", .green)
             }
         }
@@ -185,6 +186,7 @@ extension SettingsSelection.Page {
             case .mirror: "Your camera, on only while its tab is open."
             case .usage: "How much of each AI coding plan you've used."
             case .agents: "Claude Code and Codex sessions: progress, when one needs you, and when it's done."
+            case .apps: "Viorim OS and your agents: key takeaways and to-dos from each."
             case .system: "Battery health, the apps using the most energy, and your accessories' batteries."
             }
         }
@@ -506,6 +508,10 @@ private struct DisplaysPage: View {
                 Toggle(isOn: $preferences.showOnAllDisplays) {
                     Text("Show on all displays")
                     Text("Otherwise NotchDeck uses the built-in display's notch, or the main display.")
+                }
+                Toggle(isOn: $preferences.hidesInFullScreen) {
+                    Text("Hide in full-screen apps")
+                    Text("Off: the notch stays on every display and desktop.")
                 }
             }
             Section {

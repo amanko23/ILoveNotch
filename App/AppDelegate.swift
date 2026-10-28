@@ -32,6 +32,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         /// NotchDeck: Home, the dashboard; System, battery and energy; and the closed notch's pill.
         private let home: HomeFeature
         private let system: SystemFeature
+        private let apps: AppsFeature
         private let pill = ClosedPillComposer()
         /// Quick Share with Android phones, part of the shelf.
         private let transfer = TransferFeature()
@@ -73,6 +74,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             self.agents = agents
             home = HomeFeature(eventStore: eventStore, agents: agents, monitor: monitor)
             system = SystemFeature(monitor: monitor)
+            apps = AppsFeature(web: home.webApps)
         #endif
         super.init()
     }
@@ -95,7 +97,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         #else
             [
                 home, media, shelf, clipboard, calendar, tasks, notes, shortcuts, timer, network, mirror, usage, agents,
-                system,
+                apps, system,
             ]
         #endif
     }
@@ -113,6 +115,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 return AnyView(EmptyView())
             #else
                 return AnyView(system.view)
+            #endif
+        case .apps:
+            #if APP_STORE
+                return AnyView(EmptyView())
+            #else
+                return AnyView(apps.view)
             #endif
         case .media: return AnyView(media.view)
         case .sound:
@@ -176,7 +184,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         case .shortcuts: return section(shortcuts.settingsView)
         case .notes: return section(notes.settingsView)
         case .network: return section(network.settingsView)
-        case .timer, .mirror, .system: return nil
+        case .timer, .mirror, .system, .apps: return nil
         case .home:
             #if APP_STORE
                 return nil
