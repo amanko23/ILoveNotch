@@ -127,12 +127,24 @@ public final class CalendarFeature: NotchFeature {
     private static let showsTasksKey = "calendar.showsTasks"
     private static let countdownKey = "calendar.countsDownToMeetings"
     @ObservationIgnored private let eventStore: EventStore
+    /// NotchDeck: the store, for the month grid's own query (CalendarMonth.swift).
+    var eventStoreForMonth: EKEventStore { eventStore.store }
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private var changes: NSObjectProtocol?
     @ObservationIgnored private var clearNotice: Task<Void, Never>?
     @ObservationIgnored private var wake: Task<Void, Never>?
     /// The meeting the notch is counting down to.
     private(set) var countingDown: DayEvent?
+    /// NotchDeck: the month grid instead of today's agenda.
+    public var showsMonth = false {
+        didSet { if showsMonth != oldValue { loadMonth() } }
+    }
+    /// NotchDeck: a day in the month the grid shows.
+    public internal(set) var monthAnchor = Date.now
+    /// NotchDeck: the day picked in the grid, whose events list under it.
+    public var selectedDay = Calendar.current.startOfDay(for: .now)
+    /// NotchDeck: the shown month's events, held only while the grid is on screen.
+    public internal(set) var monthEvents: [DayEvent] = []
     /// Meetings the user joined from the notch, which don't count down again.
     @ObservationIgnored private var joined: Set<DayEvent.ID> = []
 
@@ -300,6 +312,7 @@ public final class CalendarFeature: NotchFeature {
             ) { [weak self] _ in
                 MainActor.assumeIsolated {
                     self?.reload()
+                    self?.loadMonth()
                     self?.watchMeetings()
                 }
             }
@@ -309,9 +322,11 @@ public final class CalendarFeature: NotchFeature {
         }
         if phase == .foreground {
             reload()
+            loadMonth()
         } else {
             events = []
             dueTasks = []
+            monthEvents = []
         }
         watchMeetings()
     }

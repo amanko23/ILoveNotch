@@ -173,6 +173,7 @@ private struct AgentsSettings: View {
                 .disabled(!agents.available.contains(tool))
             }
             Toggle("Show when an agent finishes in the background", isOn: $agents.announcesDone)
+            Toggle("Chime when a long task finishes", isOn: $agents.chimesOnLongTasks)
             if let failure = agents.failure {
                 Text(failure).font(.caption).foregroundStyle(.red)
             }

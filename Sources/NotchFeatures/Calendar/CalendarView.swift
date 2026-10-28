@@ -36,17 +36,20 @@ struct CalendarView: View {
                     if let notice = calendar.notice {
                         Text(notice).lineLimit(1).transition(.opacity)
                     }
+                    MonthToggle(calendar: calendar)
                 }
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.white.opacity(0.6))
                 .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: calendar.notice)
-                if calendar.events.isEmpty, calendar.dueTasks.isEmpty {
+                if calendar.showsMonth {
+                    MonthView(calendar: calendar)
+                } else if calendar.events.isEmpty, calendar.dueTasks.isEmpty {
                     FeatureUnavailableView(symbol: "calendar", title: "Nothing today", message: "Enjoy the free time.")
                 } else {
                     agenda
                 }
                 // Steps aside while an event is edited, which gives the editor room in the smallest notch.
-                if editing == nil {
+                if editing == nil, !calendar.showsMonth {
                     TextField("New event: try \u{201C}Lunch tomorrow 1pm for 1h\u{201D}", text: $draft)
                         .textFieldStyle(.plain)
                         .padding(.horizontal, 8)
@@ -136,7 +139,7 @@ struct CalendarView: View {
 /// One event: its calendar's color, its title, and when. Hovering one of your own events lights it
 /// and shows Edit and Delete; Delete asks for a second click before it deletes. Double-clicking or
 /// the context menu edits it too.
-private struct EventRow: View {
+struct EventRow: View {
     let calendar: CalendarFeature
     let event: DayEvent
     let edit: () -> Void

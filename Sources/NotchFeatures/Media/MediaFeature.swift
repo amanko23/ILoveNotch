@@ -475,9 +475,11 @@ public final class MediaFeature: NotchFeature {
         let activity =
             shows
             ? nowPlaying.map {
-                Activity(
+                var activity = Activity(
                     feature: .media, symbol: $0.isPlaying ? "music.note" : "pause.fill", title: $0.title,
                     duration: .seconds(3), artwork: tinyArtwork)
+                activity.equalizer = $0.isPlaying
+                return activity
             } : nil
         if activity != shownOngoing {
             shownOngoing = activity

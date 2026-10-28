@@ -126,6 +126,12 @@ public final class AgentsFeature: NotchFeature {
     public var announcesDone: Bool {
         didSet { defaults.set(announcesDone, forKey: Self.announceKey) }
     }
+    /// NotchDeck: a chime when a turn that worked for 2 minutes or more ends.
+    public var chimesOnLongTasks: Bool {
+        didSet { defaults.set(chimesOnLongTasks, forKey: Self.chimeKey) }
+    }
+    /// NotchDeck: raised with the session when a long turn ends, for the notch to flash.
+    @ObservationIgnored public var onLongTaskFinished: ((AgentSession) -> Void)?
     /// Raised when an agent finishes.
     @ObservationIgnored public var onActivity: ((Activity) -> Void)?
     /// Agents waiting for approval, for the closed notch; nil when none is.
@@ -133,6 +139,7 @@ public final class AgentsFeature: NotchFeature {
 
     let hooks: AgentHooks
     private static let announceKey = "agents.announcesDone"
+    private static let chimeKey = "agents.chimesOnLongTasks"
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private var watcher: DispatchSourceFileSystemObject?
     @ObservationIgnored private var shownWaiting: Activity?
@@ -145,6 +152,7 @@ public final class AgentsFeature: NotchFeature {
         self.hooks = hooks
         self.defaults = defaults
         announcesDone = defaults.object(forKey: Self.announceKey) as? Bool ?? true
+        chimesOnLongTasks = defaults.object(forKey: Self.chimeKey) as? Bool ?? true
     }
 
     public var view: some View { AgentsView(agents: self) }
@@ -251,7 +259,16 @@ public final class AgentsFeature: NotchFeature {
         // Waiting ones first, since those need the user; then the latest news.
         found.sort { ($0.state == .waiting ? 1 : 0, $0.updated) > ($1.state == .waiting ? 1 : 0, $1.updated) }
         let before = Dictionary(uniqueKeysWithValues: sessions.map { ($0.id, $0.state) })
+        let previous = Dictionary(uniqueKeysWithValues: sessions.map { ($0.id, $0) })
         sessions = found.map(withTitle)
+        if announcing {
+            for session in sessions {
+                guard let old = previous[session.id], Self.finishedLongTask(from: old, to: session, now: now)
+                else { continue }
+                if chimesOnLongTasks { NSSound(named: "Glass")?.play() }
+                onLongTaskFinished?(session)
+            }
+        }
         readTitles(found)
         if announcing, announcesDone {
             // Only a session seen working finishes; one found already done is old news.
@@ -265,6 +282,22 @@ public final class AgentsFeature: NotchFeature {
             }
         }
         showWaiting(Self.waiting(in: found))
+    }
+
+    /// Whether a turn of 2 minutes or more just ended: busy before, done or idle now, and just
+    /// updated (not a quiet session aged into idle).
+    nonisolated static func finishedLongTask(from old: AgentSession, to new: AgentSession, now: Date) -> Bool {
+        guard old.state == .working || old.state == .compacting, new.state == .done || new.state == .idle,
+            let since = old.workingSince, now.timeIntervalSince(new.updated) < 60
+        else { return false }
+        return new.updated.timeIntervalSince(since) >= 120
+    }
+
+    /// The notch's flash for a long turn that ended.
+    public static func finishedActivity(_ session: AgentSession) -> Activity {
+        Activity(
+            feature: .agents, symbol: "checkmark.circle.fill", title: "\(session.title ?? session.project) done",
+            duration: .seconds(3))
     }
 
     /// Chat titles by transcript, with the transcript's size when read: read again once it grows.

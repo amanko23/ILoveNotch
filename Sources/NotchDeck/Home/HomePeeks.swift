@@ -48,7 +48,7 @@ struct PeekView: View {
         case .system: return "Battery & energy"
         case .weather: return home.weather.forecast?.place.map { "Weather · \($0)" } ?? "Weather"
         case .user: return "Switch User"
-        case .viorim: return "Viorim OS"
+        case .viorim: return "Takeaways"
         }
     }
 
@@ -58,7 +58,8 @@ struct PeekView: View {
         case .claude: .agents
         case .calendar: .calendar
         case .system: .system
-        case .focus, .weather, .user, .viorim: nil
+        case .viorim: .apps
+        case .focus, .weather, .user: nil
         }
     }
 
@@ -70,7 +71,7 @@ struct PeekView: View {
         case .system: SystemPeek(monitor: home.monitor)
         case .weather: WeatherPeek(weather: home.weather, openSettings: { home.openSettings?() })
         case .user: UserPeek()
-        case .viorim: AppsPeek(web: home.webApps)
+        case .viorim: AppsPeek(apps: home.apps)
         }
     }
 }
@@ -417,15 +418,45 @@ private struct WeatherPeek: View {
 // MARK: Viorim OS
 
 private struct AppsPeek: View {
-    let web: WebApps
+    let apps: AppsFeature
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            ForEach(web.apps) { app in
-                PillButton(app.name, prominent: app.id == "viorim") { web.open(app) }
+        ScrollView {
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(apps.web.apps) { app in
+                    VStack(alignment: .leading, spacing: 3) {
+                        HStack {
+                            SectionLabel(app.name)
+                            Spacer(minLength: 0)
+                            PillButton("Open") { apps.web.open(app) }
+                        }
+                        if let summary = apps.highlights.first(where: { $0.app.id == app.id })?.summary {
+                            ForEach(Array(summary.takeaways.prefix(3).enumerated()), id: \.offset) { _, line in
+                                Takeaway(symbol: "sparkle", text: line)
+                            }
+                            ForEach(Array(summary.todos.filter { !$0.done }.prefix(3).enumerated()), id: \.offset) {
+                                _, todo in Takeaway(symbol: "circle", text: todo.title)
+                            }
+                        } else {
+                            Detail("No summary yet")
+                        }
+                    }
+                }
             }
-            Spacer(minLength: 0)
-            Detail("Each opens in its own window and stays signed in.")
+        }
+        .scrollIndicators(.never)
+    }
+}
+
+/// One takeaway or to-do line.
+struct Takeaway: View {
+    let symbol: String
+    let text: String
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 5) {
+            Image(systemName: symbol).font(.system(size: 8)).foregroundStyle(Viorim.accent)
+            Text(text).font(Viorim.footnote).foregroundStyle(Viorim.ink).lineLimit(1)
         }
     }
 }

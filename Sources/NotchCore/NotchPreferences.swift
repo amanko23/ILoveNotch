@@ -148,6 +148,11 @@ public final class NotchPreferences {
     }
 
     /// How the notch opens and closes.
+    /// NotchDeck: a hairline around the notch, so it stands out in light mode.
+    public var showsOutline: Bool {
+        didSet { defaults.set(showsOutline, forKey: Key.showsOutline) }
+    }
+
     public var animationStyle: NotchAnimationStyle {
         didSet { defaults.set(animationStyle.rawValue, forKey: Key.animationStyle) }
     }
@@ -260,6 +265,7 @@ public final class NotchPreferences {
         showOnAllDisplays = defaults.bool(forKey: Key.showOnAllDisplays)
         hidesInFullScreen = defaults.bool(forKey: Key.hidesInFullScreen)
         pillDisplays = Set(defaults.stringArray(forKey: Key.pillDisplays) ?? [])
+        showsOutline = defaults.bool(forKey: Key.showsOutline)
         animationStyle = defaults.string(forKey: Key.animationStyle).flatMap(NotchAnimationStyle.init) ?? .spring
         theme = defaults.string(forKey: Key.theme).flatMap(NotchTheme.init) ?? .black
         showsVolume = defaults.object(forKey: Key.showsVolume) as? Bool ?? true
@@ -345,6 +351,7 @@ public final class NotchPreferences {
         hidesInFullScreen = false
         pillDisplays = []
         animationStyle = .spring
+        showsOutline = false
         theme = .black
         expandedSize = Self.defaultExpandedSize
         showsVolume = true
@@ -364,6 +371,7 @@ public final class NotchPreferences {
         static let hidesInFullScreen = "hidesInFullScreen"
         static let pillDisplays = "pillDisplays"
         static let animationStyle = "animationStyle"
+        static let showsOutline = "showsOutline"
         static let theme = "theme"
         static let expandedSize = "expandedSize"
         static let showsVolume = "showsVolume"

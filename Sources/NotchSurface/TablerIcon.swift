@@ -59,6 +59,8 @@ extension FeatureID {
         case .usage: "gauge"
         case .agents: "terminal-2"
         case .apps: "layout-grid"
+        case .inbox: "inbox"
+        case .downloads: "download"
         case .system: "cpu"
         }
     }

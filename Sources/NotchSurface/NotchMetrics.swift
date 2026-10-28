@@ -29,6 +29,7 @@ struct NotchMetrics: Equatable {
     static let accessorySide: CGFloat = 13  // an activity's accessory: a progress ring or a small symbol
     /// An accessory with the gap before it: label spacing, the divider, its gap, and the mark.
     static let accessoryWidth: CGFloat = labelSpacing + 1 + 6 + accessorySide
+    static let equalizerWidth: CGFloat = 4 * 2 + 3 * 1.5  // NotchDeck: four bars and their gaps
     static let overshootRoom: CGFloat = 1.08  // springy and jelly animations briefly overshoot
 
     /// The notch is the gap between the two auxiliary top areas; no insets means no notch, and then
@@ -149,7 +150,8 @@ struct NotchMetrics: Equatable {
                 .withSymbolConfiguration(.init(pointSize: 12, weight: .semibold))?.size.width
         let width = (text as NSString).size(withAttributes: [.font: font]).width
         let accessory = activity.accessory == nil ? 0 : accessoryWidth
-        return ((symbol ?? 16) + labelSpacing + width + accessory).rounded(.up)
+        let equalizer = activity.equalizer ? labelSpacing + equalizerWidth : 0
+        return ((symbol ?? 16) + labelSpacing + width + accessory + equalizer).rounded(.up)
     }
 
     /// A one-shot activity's row: its label with room at either end.

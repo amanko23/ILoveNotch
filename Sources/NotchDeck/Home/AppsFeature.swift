@@ -73,6 +73,23 @@ public final class AppsFeature: NotchFeature {
         Task { loads[app.id] = await Self.summary(for: app) }
     }
 
+    /// Fetches every app's summary, for Home's takeaways tile.
+    public func refreshAll() {
+        let shown = selected
+        for app in web.apps {
+            selected = app.id
+            refresh()
+        }
+        selected = shown
+    }
+
+    /// Every loaded app's takeaways and open to-dos, app by app.
+    public var highlights: [(app: WebApps.App, summary: Summary)] {
+        web.apps.compactMap { app in
+            if case .loaded(let summary) = loads[app.id] { (app, summary) } else { nil }
+        }
+    }
+
     public func select(_ id: String) {
         selected = id
         refresh()

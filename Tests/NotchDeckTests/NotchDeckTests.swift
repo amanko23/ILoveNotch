@@ -321,3 +321,11 @@ struct AppsSummaryTests {
                 == "https://holdings-agent.vercel.app/api/notch")
     }
 }
+
+struct HomeTileOrderTests {
+    @Test func aStoredOrderKeepsKnownTilesAndAddsMissingOnes() {
+        let order = HomeFeature.order(["takeaways", "bogus", "claude", "claude"])
+        #expect(order == [.takeaways, .claude, .focus, .calendar])
+        #expect(HomeFeature.order(nil) == HomeFeature.TileKind.allCases)
+    }
+}

@@ -82,6 +82,8 @@ struct NotchView: View {
         .overlay {
             if contrast == .increased {
                 outline.stroke(.white.opacity(0.45), lineWidth: 1)
+            } else if preferences.showsOutline {
+                outline.stroke(Color.primary.opacity(0.25), lineWidth: 0.75)  // NotchDeck: the thin outline
             }
             if dropTargeted {
                 outline.stroke(Color.accentColor, lineWidth: 2).shadow(color: .accentColor, radius: 6)
@@ -684,6 +686,9 @@ struct NotchView: View {
             .font(.system(size: 12, weight: .medium))
             .monospacedDigit()  // numbers that change in place keep their width
             .lineLimit(1)
+            if activity.equalizer {
+                EqualizerBars().accessibilityHidden(true)
+            }
             if let accessory = activity.accessory {
                 AccessoryMark(accessory: accessory)
             }
@@ -835,6 +840,26 @@ extension View {
             pointerStyle(.frameResize(position: .bottomTrailing))
         } else {
             self
+        }
+    }
+}
+
+/// NotchDeck: four bars bouncing beside what's playing, from layered sine waves (no audio capture).
+struct EqualizerBars: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        TimelineView(.animation(minimumInterval: 1 / 20, paused: reduceMotion)) { context in
+            let t = context.date.timeIntervalSinceReferenceDate
+            HStack(alignment: .center, spacing: 1.5) {
+                ForEach(0..<4, id: \.self) { bar in
+                    let phase = Double(bar) * 1.7
+                    let wave = abs(sin(t * (5 + Double(bar)) + phase) * cos(t * 2.3 + phase))
+                    let level = reduceMotion ? 0.5 : 0.35 + 0.65 * wave
+                    Capsule().frame(width: 2, height: max(3, 12 * level))
+                }
+            }
+            .frame(width: NotchMetrics.equalizerWidth, height: 12)
         }
     }
 }

@@ -26,13 +26,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Sound and Network stay in the drawer.
         private let preferences = NotchPreferences(
             unavailable: [.shelf, .clipboard, .tasks, .notes, .shortcuts, .mirror, .usage],
-            drawerByDefault: [.sound, .network])
+            drawerByDefault: [.network])
         private let usage = UsageFeature()
         private let agents: AgentsFeature
         /// NotchDeck: Home, the dashboard; System, battery and energy; and the closed notch's pill.
         private let home: HomeFeature
         private let system: SystemFeature
         private let apps: AppsFeature
+        private let inbox = InboxFeature()
+        private let downloads = DownloadsFeature()
         private let pill = ClosedPillComposer()
         /// Quick Share with Android phones, part of the shelf.
         private let transfer = TransferFeature()
@@ -74,7 +76,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             self.agents = agents
             home = HomeFeature(eventStore: eventStore, agents: agents, monitor: monitor)
             system = SystemFeature(monitor: monitor)
-            apps = AppsFeature(web: home.webApps)
+            apps = home.apps
         #endif
         super.init()
     }
@@ -97,7 +99,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         #else
             [
                 home, media, shelf, clipboard, calendar, tasks, notes, shortcuts, timer, network, mirror, usage, agents,
-                apps, system,
+                apps, inbox, downloads, system,
             ]
         #endif
     }
@@ -121,6 +123,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 return AnyView(EmptyView())
             #else
                 return AnyView(apps.view)
+            #endif
+        case .inbox:
+            #if APP_STORE
+                return AnyView(EmptyView())
+            #else
+                return AnyView(inbox.view)
+            #endif
+        case .downloads:
+            #if APP_STORE
+                return AnyView(EmptyView())
+            #else
+                return AnyView(downloads.view)
             #endif
         case .media: return AnyView(media.view)
         case .sound:
@@ -184,7 +198,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         case .shortcuts: return section(shortcuts.settingsView)
         case .notes: return section(notes.settingsView)
         case .network: return section(network.settingsView)
-        case .timer, .mirror, .system, .apps: return nil
+        case .timer, .mirror, .system, .apps, .inbox, .downloads: return nil
         case .home:
             #if APP_STORE
                 return nil
@@ -209,6 +223,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func section(_ rows: some View) -> AnyView { AnyView(Section { rows }) }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        #if !APP_STORE
+            // NotchDeck, once: Sound (per-app volume, outputs) moves from the drawer into the row, after Media.
+            if !UserDefaults.standard.bool(forKey: "notchdeck.soundInRow") {
+                UserDefaults.standard.set(true, forKey: "notchdeck.soundInRow")
+                let media = preferences.rowTabs.firstIndex(of: .media) ?? 0
+                preferences.place(.sound, at: media + 1)
+            }
+        #endif
         let content = NotchContent(
             tab: { [unowned self] in self.tabView(for: $0) },
             dropFiles: { [preferences, shelf] urls in preferences.tabs.contains(.shelf) && shelf.add(urls) },
@@ -265,6 +287,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             usage.openSettings = { [weak self] in self?.settings.show(.feature(.usage)) }
             agents.onActivity = { [weak coordinator] in coordinator?.broadcast(.activity($0)) }
             agents.onOngoing = { [weak coordinator] in coordinator?.setOngoing($0, for: .agents) }
+            agents.onLongTaskFinished = { [weak coordinator] session in
+                coordinator?.broadcast(.activity(AgentsFeature.finishedActivity(session)))
+            }
+            downloads.onActivity = { [weak coordinator] in coordinator?.setOngoing($0, for: .downloads) }
             home.pomodoro.onActivity = { [weak coordinator] in coordinator?.broadcast(.activity($0)) }
             home.openTab = { [weak coordinator] in coordinator?.open($0) }
             home.openSettings = { [weak self] in self?.settings.show(.feature(.home)) }

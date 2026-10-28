@@ -26,19 +26,39 @@ struct HomeView: View {
     private static let back = AnyTransition.move(edge: .leading).combined(with: .opacity)
 
     private var dashboard: some View {
-        VStack(spacing: 6) {
+        let order = home.tileOrder
+        return VStack(spacing: 6) {
             HStack(spacing: 6) {
-                ClaudeTile(home: home).layoutPriority(1)
-                AppsTile(home: home)
+                ForEach(order.prefix(2), id: \.self) { tile($0) }
             }
             .frame(maxHeight: .infinity)
             HStack(spacing: 6) {
-                FocusTile(home: home)
-                TodayTile(home: home)
-                SystemTile(home: home)
+                ForEach(order.dropFirst(2), id: \.self) { tile($0) }
             }
             .frame(maxHeight: .infinity)
             HomeFooter(home: home)
+        }
+        .animation(reduceMotion ? Viorim.reduced : Viorim.smooth, value: order)
+    }
+
+    /// A tile, which can be dragged onto another to swap places.
+    private func tile(_ kind: HomeFeature.TileKind) -> some View {
+        Group {
+            switch kind {
+            case .claude: ClaudeTile(home: home)
+            case .focus: FocusTile(home: home)
+            case .calendar: TodayTile(home: home)
+            case .takeaways: TakeawaysTile(home: home)
+            }
+        }
+        .onDrag { NSItemProvider(object: kind.rawValue as NSString) }
+        .onDrop(of: [.text], isTargeted: nil) { providers in
+            guard let provider = providers.first else { return false }
+            _ = provider.loadObject(ofClass: NSString.self) { item, _ in
+                guard let raw = item as? String, let dragged = HomeFeature.TileKind(rawValue: raw) else { return }
+                Task { @MainActor in home.move(dragged, to: kind) }
+            }
+            return true
         }
     }
 }
@@ -138,59 +158,42 @@ private struct TodayTile: View {
     }
 }
 
-/// System: the charge, and the app using the most energy.
-private struct SystemTile: View {
+/// The agents' key takeaways and open to-dos, the latest few across Viorim OS, Agents and Holdings.
+private struct TakeawaysTile: View {
     let home: HomeFeature
 
     var body: some View {
-        let monitor = home.monitor
-        let battery = monitor.battery
+        let highlights = home.apps.highlights
+        let open = highlights.reduce(0) { $0 + $1.summary.todos.filter { !$0.done }.count }
         Tile(
-            title: battery.map { "System · \($0.percent)%" } ?? "System",
-            symbol: battery?.symbol ?? "cpu", tint: Deck.system, home: home, opens: .system
+            title: "Takeaways", symbol: "sparkles", tint: Viorim.accent, badge: open > 0 ? "\(open)" : nil,
+            home: home, opens: .viorim
         ) {
-            let top = monitor.energy.top
-            if let first = top.first {
-                HStack(alignment: .firstTextBaseline, spacing: 4) {
-                    Text(first.name).font(Viorim.body).foregroundStyle(Viorim.ink).lineLimit(1)
-                    Spacer(minLength: 2)
-                    Text(first.wattsText).font(Viorim.metric(15)).monospacedDigit().foregroundStyle(Viorim.ink)
-                }
-                if top.count > 1 {
-                    Detail(top.dropFirst().prefix(2).map { "\($0.name) \($0.wattsText)" }.joined(separator: " · "))
-                }
+            let lines = highlights.flatMap { item in
+                item.summary.takeaways.prefix(1).map { "\(item.app.name): \($0)" }
+                    + item.summary.todos.filter { !$0.done }.prefix(1).map { "\(item.app.name): \($0.title)" }
+            }
+            if lines.isEmpty {
+                Detail("Your agents' takeaways and to-dos show here.")
             } else {
-                Detail(monitor.energy.isMeasuring ? "Measuring energy use…" : "Nothing is using much energy.")
-                if let battery { Detail(battery.powerText) }
+                ForEach(Array(lines.prefix(3).enumerated()), id: \.offset) { _, line in
+                    Takeaway(symbol: "sparkle", text: line)
+                }
             }
-        }
-    }
-}
-
-/// Viorim OS and the agents' dashboards, each a click away in a window that stays signed in.
-private struct AppsTile: View {
-    let home: HomeFeature
-
-    var body: some View {
-        let web = home.webApps
-        Tile(title: "Apps", symbol: "square.grid.2x2", tint: Viorim.accent, home: home, opens: .viorim) {
-            ForEach(web.apps) { app in
-                PillButton(app.name, prominent: app.id == "viorim") { web.open(app) }
-            }
-            Spacer(minLength: 0)
         }
     }
 }
 
 // MARK: Footer
 
-/// The weather on the left; the date, time and light/dark switch together on the right.
+/// The weather and the battery on the left; the date, time and light/dark switch on the right.
 private struct HomeFooter: View {
     let home: HomeFeature
 
     var body: some View {
         HStack(spacing: 0) {
             weather
+            battery
             Spacer(minLength: 4)
             HStack(spacing: 8) {
                 TimelineView(.everyMinute) { context in
@@ -218,6 +221,15 @@ private struct HomeFooter: View {
                 title: model.status == .loading || model.status == .locating ? "Weather…" : "Weather",
                 tint: Deck.weather
             ) { home.show(.weather) }
+        }
+    }
+
+    @ViewBuilder private var battery: some View {
+        if let battery = home.monitor.battery {
+            FooterButton(symbol: battery.symbol, title: "\(battery.percent)%", tint: Viorim.ink2) {
+                home.openTab?(.system)
+            }
+            .help(battery.powerText)
         }
     }
 

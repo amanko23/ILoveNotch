@@ -7,9 +7,9 @@ import Observation
 import SwiftUI
 
 /// Home: NotchDeck's dashboard, the tab the notch opens on. Claude Code, Pomodoro, today's
-/// calendar, and the Mac's battery and energy as tiles, with the weather, a light/dark switch, and
-/// Switch User along the bottom. A tile opens a peek with more. Nothing here runs while Home is off
-/// screen, except Pomodoro's one deadline.
+/// calendar, and the agents' takeaways as tiles you can drag into any order, with the weather,
+/// the battery, the date and time, and a light/dark switch along the bottom. A tile opens a peek
+/// with more. Nothing here runs while Home is off screen, except Pomodoro's one deadline.
 @MainActor
 @Observable
 public final class HomeFeature: NotchFeature {
@@ -32,6 +32,16 @@ public final class HomeFeature: NotchFeature {
     public let monitor: SystemMonitor
     public let agents: AgentsFeature
     public let webApps: WebApps
+    /// The Apps tab, whose takeaways Home's tile shows too.
+    public let apps: AppsFeature
+
+    /// The dashboard's four tiles, in the order the user dragged them into.
+    public enum TileKind: String, CaseIterable, Sendable {
+        case claude, focus, calendar, takeaways
+    }
+    public var tileOrder: [TileKind] {
+        didSet { defaults.set(tileOrder.map(\.rawValue), forKey: Key.tileOrder) }
+    }
 
     /// Per-feature setting: the agent projects that get a page each in the Claude peek, by folder
     /// name. Sessions in any other folder share an "Other" page.
@@ -66,12 +76,32 @@ public final class HomeFeature: NotchFeature {
         weather = WeatherModel(defaults: defaults)
         agenda = Agenda(eventStore: eventStore)
         webApps = WebApps(defaults: defaults)
+        apps = AppsFeature(web: webApps)
+        tileOrder = Self.order(defaults.stringArray(forKey: Key.tileOrder))
         agentProjects = defaults.stringArray(forKey: Key.agentProjects) ?? Self.defaultAgentProjects
         opensOnHome = defaults.object(forKey: Key.opensOnHome) as? Bool ?? true
         showsClaudeInClosedNotch = defaults.object(forKey: Key.showsClaude) as? Bool ?? true
     }
 
     public var view: some View { HomeView(home: self) }
+
+    /// A stored order, with unknown tiles dropped and missing ones appended.
+    static func order(_ stored: [String]?) -> [TileKind] {
+        var seen = Set<TileKind>()
+        let kept = (stored ?? []).compactMap(TileKind.init).filter { seen.insert($0).inserted }
+        return kept + TileKind.allCases.filter { !seen.contains($0) }
+    }
+
+    /// Moves `tile` to where `target` is.
+    public func move(_ tile: TileKind, to target: TileKind) {
+        guard tile != target, let from = tileOrder.firstIndex(of: tile),
+            let to = tileOrder.firstIndex(of: target)
+        else { return }
+        var order = tileOrder
+        order.remove(at: from)
+        order.insert(tile, at: to)
+        tileOrder = order
+    }
 
     public func show(_ peek: Peek) {
         self.peek = peek
@@ -95,6 +125,7 @@ public final class HomeFeature: NotchFeature {
             agenda.start()
             appearance.startObserving()
             weather.refreshIfStale()
+            apps.refreshAll()
         } else {
             monitor.stop(for: "home")
             agenda.stop()
@@ -107,6 +138,7 @@ public final class HomeFeature: NotchFeature {
         static let opensOnHome = "home.opensOnHome"
         static let showsClaude = "home.showsClaudeInClosedNotch"
         static let agentProjects = "home.agentProjects"
+        static let tileOrder = "home.tileOrder"
     }
 }
 
