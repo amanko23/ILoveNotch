@@ -3,7 +3,8 @@ import AppKit
 import NotchFeatures
 import SwiftUI
 
-/// The System tab: the battery in full, the apps using the most energy, and accessory batteries.
+/// The System tab: the battery in full, CPU, GPU and temperature graphs, the apps using the most
+/// energy, accessory batteries, keep awake, each display's brightness, and battery alerts.
 struct SystemView: View {
     let monitor: SystemMonitor
 
@@ -12,6 +13,7 @@ struct SystemView: View {
             VStack(alignment: .leading, spacing: 8) {
                 BatteryStats(battery: monitor.battery)
                 if let battery = monitor.battery { details(battery) }
+                PerformanceGraphs(performance: monitor.performance)
                 HStack(alignment: .top, spacing: 14) {
                     VStack(alignment: .leading, spacing: 3) {
                         SectionLabel("Using the most energy now")
@@ -24,6 +26,9 @@ struct SystemView: View {
                     }
                     .frame(width: 130, alignment: .leading)
                 }
+                KeepAwakeRow(keepAwake: monitor.keepAwake)
+                BrightnessList(brightness: monitor.brightness)
+                BatteryAlertsRow(alerts: monitor.batteryAlerts)
                 Detail("Energy covers your own apps; system processes need admin rights to measure.")
             }
             .padding(.vertical, 4)

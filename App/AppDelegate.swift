@@ -291,6 +291,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 coordinator?.broadcast(.activity(AgentsFeature.finishedActivity(session)))
             }
             downloads.onActivity = { [weak coordinator] in coordinator?.setOngoing($0, for: .downloads) }
+            home.monitor.batteryAlerts.onAlert = { [weak coordinator] symbol, title in
+                coordinator?.broadcast(
+                    .activity(Activity(feature: .system, symbol: symbol, title: title, duration: .seconds(5))))
+            }
+            home.monitor.batteryAlerts.start()
             home.pomodoro.onActivity = { [weak coordinator] in coordinator?.broadcast(.activity($0)) }
             home.openTab = { [weak coordinator] in coordinator?.open($0) }
             home.openSettings = { [weak self] in self?.settings.show(.feature(.home)) }

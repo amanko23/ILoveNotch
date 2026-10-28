@@ -101,7 +101,7 @@ public final class InboxFeature: NotchFeature {
             MainActor.assumeIsolated {
                 guard let self else { return }
                 // Re-read at most every 10 s.
-                guard Date.now.timeIntervalSince(lastRead) > 10 else { return }
+                guard Date.now.timeIntervalSince(self.lastRead) > 10 else { return }
                 Task { await self.read() }
             }
         }
@@ -138,7 +138,7 @@ public final class InboxFeature: NotchFeature {
         var buffer = [CChar](repeating: 0, count: Int(PATH_MAX))
         var candidates: [String] = []
         if confstr(_CS_DARWIN_USER_DIR, &buffer, buffer.count) > 0 {
-            let directory = String(cString: buffer)
+            let directory = String(decoding: buffer.prefix { $0 != 0 }.map { UInt8(bitPattern: $0) }, as: UTF8.self)
             candidates.append((directory as NSString).appendingPathComponent("com.apple.notificationcenter/db2/db"))
         }
         candidates.append(
