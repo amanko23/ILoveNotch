@@ -1,0 +1,400 @@
+86:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+90:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+94:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+98:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+102:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Codex/CodexProvider.swift:37:67: warning: no 'async' operations occur within 'await' expression
+106:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+110:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Copilot/CopilotUsageMapper.swift:209:13: warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'DateFormatter', consider removing it
+114:    |             `- warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'DateFormatter', consider removing it
+118:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Cursor/CursorProvider.swift:29:67: warning: no 'async' operations occur within 'await' expression
+122:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+126:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+130:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+159:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+163:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+167:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+171:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+175:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+179:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+183:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+187:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+191:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+195:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+199:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+203:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+207:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+211:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+215:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+219:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+223:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+227:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+231:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+235:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+239:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+243:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+247:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+251:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+255:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+259:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+263:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+267:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+271:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+275:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+279:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+283:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+286:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+290:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+294:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+298:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+301:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+305:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+309:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+313:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+316:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+320:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+324:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+328:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+331:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+335:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+339:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+343:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+347:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+351:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+355:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+359:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+363:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+367:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+371:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+375:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+379:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+383:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+387:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+391:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+395:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+399:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+403:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+407:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+411:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+415:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+419:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+423:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+427:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+431:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+435:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+439:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+443:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+447:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+451:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+455:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+459:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+463:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+467:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+471:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+475:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+479:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+483:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+487:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+491:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+495:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+499:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+503:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+507:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+511:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+515:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+519:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+523:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+527:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+531:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+535:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+539:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+543:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+547:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Codex/CodexProvider.swift:37:67: warning: no 'async' operations occur within 'await' expression
+551:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+555:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Cursor/CursorProvider.swift:29:67: warning: no 'async' operations occur within 'await' expression
+559:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+563:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+567:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+571:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+575:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+579:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+583:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+587:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Codex/CodexProvider.swift:37:67: warning: no 'async' operations occur within 'await' expression
+591:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+595:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Cursor/CursorProvider.swift:29:67: warning: no 'async' operations occur within 'await' expression
+599:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+603:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+607:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+611:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+615:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+619:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+623:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+627:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Codex/CodexProvider.swift:37:67: warning: no 'async' operations occur within 'await' expression
+631:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+635:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Cursor/CursorProvider.swift:29:67: warning: no 'async' operations occur within 'await' expression
+639:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+643:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+647:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+651:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+655:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+659:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+663:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+667:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Codex/CodexProvider.swift:37:67: warning: no 'async' operations occur within 'await' expression
+671:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+675:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Cursor/CursorProvider.swift:29:67: warning: no 'async' operations occur within 'await' expression
+679:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+683:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+687:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+691:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+695:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+699:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+703:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+707:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Codex/CodexProvider.swift:37:67: warning: no 'async' operations occur within 'await' expression
+711:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+715:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Cursor/CursorProvider.swift:29:67: warning: no 'async' operations occur within 'await' expression
+719:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+723:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+727:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+731:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+735:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+739:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+743:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+747:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Codex/CodexProvider.swift:37:67: warning: no 'async' operations occur within 'await' expression
+751:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+755:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Cursor/CursorProvider.swift:29:67: warning: no 'async' operations occur within 'await' expression
+759:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+763:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+767:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+771:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+775:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+779:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+783:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+787:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Codex/CodexProvider.swift:37:67: warning: no 'async' operations occur within 'await' expression
+791:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+795:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Cursor/CursorProvider.swift:29:67: warning: no 'async' operations occur within 'await' expression
+799:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+803:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+807:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+811:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+815:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+819:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+823:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+827:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Codex/CodexProvider.swift:37:67: warning: no 'async' operations occur within 'await' expression
+831:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+835:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Cursor/CursorProvider.swift:29:67: warning: no 'async' operations occur within 'await' expression
+839:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+843:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+847:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+851:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+855:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+859:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+863:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+867:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Codex/CodexProvider.swift:37:67: warning: no 'async' operations occur within 'await' expression
+871:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+875:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Cursor/CursorProvider.swift:29:67: warning: no 'async' operations occur within 'await' expression
+879:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+883:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+887:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+891:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+895:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+899:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+903:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+907:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Codex/CodexProvider.swift:37:67: warning: no 'async' operations occur within 'await' expression
+911:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+915:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Cursor/CursorProvider.swift:29:67: warning: no 'async' operations occur within 'await' expression
+919:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+923:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+927:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+931:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+935:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+939:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+943:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+947:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Codex/CodexProvider.swift:37:67: warning: no 'async' operations occur within 'await' expression
+951:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+955:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Cursor/CursorProvider.swift:29:67: warning: no 'async' operations occur within 'await' expression
+959:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+963:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+967:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+971:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+975:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+979:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+983:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+987:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Codex/CodexProvider.swift:37:67: warning: no 'async' operations occur within 'await' expression
+991:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+995:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Cursor/CursorProvider.swift:29:67: warning: no 'async' operations occur within 'await' expression
+999:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1003:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+1007:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1011:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+1015:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1019:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+1023:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1027:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Codex/CodexProvider.swift:37:67: warning: no 'async' operations occur within 'await' expression
+1031:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1035:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Cursor/CursorProvider.swift:29:67: warning: no 'async' operations occur within 'await' expression
+1039:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1043:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+1047:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1051:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+1055:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1059:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+1063:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1067:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Codex/CodexProvider.swift:37:67: warning: no 'async' operations occur within 'await' expression
+1071:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1075:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Cursor/CursorProvider.swift:29:67: warning: no 'async' operations occur within 'await' expression
+1079:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1083:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+1087:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1091:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+1095:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1099:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+1103:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1107:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Codex/CodexProvider.swift:37:67: warning: no 'async' operations occur within 'await' expression
+1111:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1115:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Cursor/CursorProvider.swift:29:67: warning: no 'async' operations occur within 'await' expression
+1119:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1123:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+1127:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1131:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+1135:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1138:[182/252] Compiling NotchUsage UsageLogReadFailureReporter.swift
+1139:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+1143:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1147:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Codex/CodexProvider.swift:37:67: warning: no 'async' operations occur within 'await' expression
+1151:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1155:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Cursor/CursorProvider.swift:29:67: warning: no 'async' operations occur within 'await' expression
+1159:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1163:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+1167:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1171:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+1175:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1179:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+1183:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1187:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Codex/CodexProvider.swift:37:67: warning: no 'async' operations occur within 'await' expression
+1191:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1195:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Cursor/CursorProvider.swift:29:67: warning: no 'async' operations occur within 'await' expression
+1199:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1203:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+1207:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1211:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+1215:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1219:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+1223:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1227:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Codex/CodexProvider.swift:37:67: warning: no 'async' operations occur within 'await' expression
+1231:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1235:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Cursor/CursorProvider.swift:29:67: warning: no 'async' operations occur within 'await' expression
+1239:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1243:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+1247:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1251:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+1255:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1259:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+1263:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1267:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Codex/CodexProvider.swift:37:67: warning: no 'async' operations occur within 'await' expression
+1271:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1275:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Cursor/CursorProvider.swift:29:67: warning: no 'async' operations occur within 'await' expression
+1279:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1283:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+1287:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1291:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+1295:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1299:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+1303:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1307:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Codex/CodexProvider.swift:37:67: warning: no 'async' operations occur within 'await' expression
+1311:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1315:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Cursor/CursorProvider.swift:29:67: warning: no 'async' operations occur within 'await' expression
+1319:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1323:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+1327:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1331:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+1335:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1339:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+1343:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1347:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Codex/CodexProvider.swift:37:67: warning: no 'async' operations occur within 'await' expression
+1351:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1355:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Cursor/CursorProvider.swift:29:67: warning: no 'async' operations occur within 'await' expression
+1359:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1363:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+1367:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1371:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+1375:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1379:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+1383:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1387:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Codex/CodexProvider.swift:37:67: warning: no 'async' operations occur within 'await' expression
+1391:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1395:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Cursor/CursorProvider.swift:29:67: warning: no 'async' operations occur within 'await' expression
+1399:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1403:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+1407:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1411:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+1415:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1419:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+1423:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1427:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Codex/CodexProvider.swift:37:67: warning: no 'async' operations occur within 'await' expression
+1431:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1435:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Cursor/CursorProvider.swift:29:67: warning: no 'async' operations occur within 'await' expression
+1439:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1443:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+1447:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1451:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+1455:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1459:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+1463:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1467:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Codex/CodexProvider.swift:37:67: warning: no 'async' operations occur within 'await' expression
+1471:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1475:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Cursor/CursorProvider.swift:29:67: warning: no 'async' operations occur within 'await' expression
+1479:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1483:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+1487:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1491:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+1495:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1500:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+1504:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1508:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+1512:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1516:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+1520:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1524:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+1528:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1532:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+1536:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1540:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+1544:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1548:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+1552:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1556:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+1560:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1564:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+1568:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1572:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+1576:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1580:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+1584:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1588:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+1592:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1596:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+1600:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1604:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+1608:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1612:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+1616:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1620:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+1624:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1628:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+1632:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1636:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+1640:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1644:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+1648:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1652:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+1656:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1660:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+1664:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1668:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+1672:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1676:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+1680:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1684:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+1688:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1692:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Codex/CodexProvider.swift:37:67: warning: no 'async' operations occur within 'await' expression
+1696:    |                                                                   `- warning: no 'async' operations occur within 'await' expression
+1700:/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Copilot/CopilotUsageMapper.swift:209:13: warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'DateFormatter', consider removing it

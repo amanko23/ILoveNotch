@@ -1,0 +1,1 @@
+swift format lint --strict --recursive App Sources Tests Package.swift
