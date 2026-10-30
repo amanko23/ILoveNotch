@@ -37,7 +37,10 @@ public final class MediaFeature: NotchFeature {
         didSet {
             phase == .stopped ? stop() : start()
             updateAudio()
-            if phase == .foreground { refreshScripted() }
+            if phase == .foreground {
+                refreshScripted()
+                loadLyricsIfNeeded()
+            }
             updateOngoing()
         }
     }
@@ -65,6 +68,54 @@ public final class MediaFeature: NotchFeature {
             updateOngoing()
         }
     }
+    /// Per-feature setting: the line being sung, from LRCLIB, under what's playing.
+    public var showsLyrics: Bool {
+        didSet {
+            defaults.set(showsLyrics, forKey: Self.lyricsKey)
+            loadLyricsIfNeeded()
+        }
+    }
+    /// The playing track's timed lyrics, once LRCLIB has answered.
+    public private(set) var syncedLyrics: SyncedLyrics?
+    @ObservationIgnored private var lyricsTrack: String?
+    @ObservationIgnored private var lyricsTask: Task<Void, Never>?
+
+    /// Whether what's playing is a video (Netflix, YouTube, a video player), so the closed notch can
+    /// keep quiet while you watch.
+    public var isWatchingVideo: Bool {
+        guard let now = nowPlaying, now.isPlaying else { return false }
+        return VideoDetector.isVideo(bundleID: now.appBundleID, title: now.title, artist: now.artist, album: now.album)
+    }
+
+    /// The line sung at `date` and the next one; nil when there are no timed lyrics.
+    public func lyric(at date: Date) -> (current: String?, next: String?) {
+        guard showsLyrics, let lyrics = syncedLyrics, let position = nowPlaying?.position(at: date) else {
+            return (nil, nil)
+        }
+        return lyrics.line(at: position)
+    }
+
+    public var currentLyric: String? { lyric(at: .now).current }
+    public var nextLyric: String? { lyric(at: .now).next }
+
+    /// Fetches the playing track's lyrics once per track, while something shows them (Media, or Home
+    /// calling this). Videos and paused tracks are skipped.
+    public func loadLyricsIfNeeded() {
+        guard showsLyrics, let now = nowPlaying, !isWatchingVideo else { return }
+        let key = LyricsProvider.key(artist: now.artist, title: now.title)
+        guard key != lyricsTrack else { return }
+        lyricsTrack = key
+        syncedLyrics = nil
+        lyricsTask?.cancel()
+        let (title, artist, album, duration) = (now.title, now.artist, now.album, now.duration)
+        lyricsTask = Task { [weak self] in
+            let found = await LyricsProvider.shared.lyrics(
+                title: title, artist: artist, album: album, duration: duration)
+            guard !Task.isCancelled, let self, self.lyricsTrack == key else { return }
+            self.syncedLyrics = found
+        }
+    }
+
     /// What Music or Spotify says through AppleScript about the track playing now.
     public private(set) var scripted: ScriptedState?
     /// The player's list: Music's up next, or Spotify tracks played earlier. Nil until it's loaded.
@@ -84,6 +135,7 @@ public final class MediaFeature: NotchFeature {
     private static let announceKey = "media.announcesTracks"
     private static let followsAudioKey = "media.waveformFollowsAudio"
     private static let closedNotchKey = "media.showsInClosedNotch"
+    private static let lyricsKey = "media.showsLyrics"
     /// How long a paused track stays in the closed notch.
     nonisolated static let linger: TimeInterval = 60
     /// What macOS answered when asked whether NotchDeck may script each player.
@@ -118,6 +170,7 @@ public final class MediaFeature: NotchFeature {
         announcesTracks = defaults.object(forKey: Self.announceKey) as? Bool ?? true
         waveformFollowsAudio = defaults.object(forKey: Self.followsAudioKey) as? Bool ?? true
         showsInClosedNotch = defaults.object(forKey: Self.closedNotchKey) as? Bool ?? true
+        showsLyrics = defaults.object(forKey: Self.lyricsKey) as? Bool ?? true
     }
 
     /// The audio tap runs only while its bars can be seen moving: Media on screen, something playing,
@@ -444,6 +497,11 @@ public final class MediaFeature: NotchFeature {
             lyrics = nil
             refreshScripted()
         }
+        if newTrack {
+            syncedLyrics = nil
+            lyricsTrack = nil
+        }
+        if phase == .foreground { loadLyricsIfNeeded() }
         let settled = Date().timeIntervalSince(startedAt) > 1.5  // the first payloads are the current state
         if announcesTracks, Self.shouldAnnounce(now, after: previous, settled: settled, phase: phase), let now {
             onActivity?(Activity(feature: .media, symbol: "music.note", title: now.title, duration: .seconds(3)))

@@ -12,6 +12,10 @@ extension MediaFeature {
                 Text("Show what's playing in the closed notch")
                 Text("The cover and title stay beside the camera while music plays, and for a minute after it pauses.")
             }
+            Toggle(isOn: $media.showsLyrics) {
+                Text("Show synced lyrics")
+                Text("The line being sung, from LRCLIB. It's sent the song's title, artist and album.")
+            }
             Toggle(isOn: $media.waveformFollowsAudio) {
                 Text("Waveform follows the music")
                 Text(

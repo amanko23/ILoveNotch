@@ -20,7 +20,8 @@ The app itself runs on 14.6+; macOS 26 APIs (Liquid Glass) sit behind `#availabl
 
 ## Licence policy (hard rules)
 
-- This project is **MIT**. Never copy code from GPL projects (sk-ruban/notchi is GPL-3.0-only;
+- This project is **MIT**. Never copy code from juliendesigncraft/pulsar (PolyForm Noncommercial;
+  its prompts are CC BY-NC) or Vorssaint (GPL-3.0). Never copy code from GPL projects (sk-ruban/notchi is GPL-3.0-only;
   TheBoredTeam/boring.notch and Ebullioscopic/Atoll are GPL-3.0) or from repos with no licence
   (spitfiresb/notch). Ideas and documented behaviour only.
 - Code adapted from MIT/BSD/Apache projects (e.g. abizer/wtop MIT, gmr/claude-status BSD-3) must be
@@ -48,9 +49,13 @@ or code content: only state, project folder, terminal app, pid, the approval mes
 and the current step label. Only use hook events Claude Code has had for a long time; an unknown
 event name can invalidate the user's settings file.
 
+The one exception to "never block" is the opt-in `PermissionRequest` hook that lets the notch answer
+Allow/Deny: it waits at most 60 s for an answer, exits at once when NotchDeck isn't running or the
+setting is off, and on timeout prints nothing so the terminal dialog takes over.
+
 ## Privacy
 
 No accounts, no telemetry. Weather calls api.open-meteo.com with coordinates rounded to 0.1°.
 The Apps tab asks your own sites (Viorim OS and the agents) for `/api/notch` with their saved
-sign-in, only while it is on screen. Nothing else leaves the Mac. Never store or handle passwords (Switch User hands off to the login
-window).
+sign-in, only while it is on screen. Lyrics come from lrclib.net (artist, title, album and length of
+the song playing; no account). Nothing else leaves the Mac. Never store or handle passwords.

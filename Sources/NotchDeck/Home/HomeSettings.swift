@@ -22,6 +22,10 @@ private struct HomeSettings: View {
                     Text("Always open on Home")
                     Text("Otherwise the notch opens on the tab you used last.")
                 }
+                Toggle(isOn: $home.hidesWhileWatchingVideo) {
+                    Text("Keep the notch quiet while watching video")
+                    Text("No titles beside the camera during YouTube, Netflix and the like. Hover to open it.")
+                }
                 Toggle(isOn: $home.showsClaudeInClosedNotch) {
                     Text("Show Claude's progress in the closed notch")
                     Text("A ring beside what's playing, or Claude on its own, while a session works.")

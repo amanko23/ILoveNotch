@@ -15,7 +15,7 @@ import SwiftUI
 public final class HomeFeature: NotchFeature {
     /// The detail a tile opens, in place of the tiles.
     public enum Peek: String, Sendable {
-        case claude, focus, calendar, system, weather, user, viorim
+        case claude, music, focus, calendar, system, weather, user, viorim
     }
 
     public let id = FeatureID.home
@@ -34,10 +34,12 @@ public final class HomeFeature: NotchFeature {
     public let webApps: WebApps
     /// The Apps tab, whose takeaways Home's tile shows too.
     public let apps: AppsFeature
+    /// What's playing, for the Music tile; set by the app.
+    public var media: MediaFeature?
 
     /// The dashboard's four tiles, in the order the user dragged them into.
     public enum TileKind: String, CaseIterable, Sendable {
-        case claude, focus, calendar, takeaways
+        case claude, music, calendar, focus, takeaways
     }
     public var tileOrder: [TileKind] {
         didSet { defaults.set(tileOrder.map(\.rawValue), forKey: Key.tileOrder) }
@@ -51,6 +53,12 @@ public final class HomeFeature: NotchFeature {
     public static let defaultAgentProjects = [
         "holdings-agent", "ipo-agent", "industry-agent", "investor-agent", "viorim-os",
     ]
+
+    /// Per-feature setting: while a video plays (YouTube, Netflix, a player app), the closed notch
+    /// shows nothing until hovered.
+    public var hidesWhileWatchingVideo: Bool {
+        didSet { defaults.set(hidesWhileWatchingVideo, forKey: Key.hidesForVideo) }
+    }
 
     /// Per-feature setting: the notch always opens on Home, not the tab used last.
     public var opensOnHome: Bool {
@@ -80,6 +88,7 @@ public final class HomeFeature: NotchFeature {
         tileOrder = Self.order(defaults.stringArray(forKey: Key.tileOrder))
         agentProjects = defaults.stringArray(forKey: Key.agentProjects) ?? Self.defaultAgentProjects
         opensOnHome = defaults.object(forKey: Key.opensOnHome) as? Bool ?? true
+        hidesWhileWatchingVideo = defaults.object(forKey: Key.hidesForVideo) as? Bool ?? true
         showsClaudeInClosedNotch = defaults.object(forKey: Key.showsClaude) as? Bool ?? true
     }
 
@@ -88,8 +97,12 @@ public final class HomeFeature: NotchFeature {
     /// A stored order, with unknown tiles dropped and missing ones appended.
     static func order(_ stored: [String]?) -> [TileKind] {
         var seen = Set<TileKind>()
-        let kept = (stored ?? []).compactMap(TileKind.init).filter { seen.insert($0).inserted }
-        return kept + TileKind.allCases.filter { !seen.contains($0) }
+        var order = (stored ?? []).compactMap(TileKind.init).filter { seen.insert($0).inserted }
+        // A tile the stored order doesn't know yet goes in at its default place.
+        for (index, tile) in TileKind.allCases.enumerated() where !seen.contains(tile) {
+            order.insert(tile, at: min(index, order.count))
+        }
+        return order
     }
 
     /// Moves `tile` to where `target` is.
@@ -139,6 +152,7 @@ public final class HomeFeature: NotchFeature {
         static let showsClaude = "home.showsClaudeInClosedNotch"
         static let agentProjects = "home.agentProjects"
         static let tileOrder = "home.tileOrder"
+        static let hidesForVideo = "home.hidesWhileWatchingVideo"
     }
 }
 

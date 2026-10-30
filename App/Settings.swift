@@ -159,6 +159,7 @@ extension SettingsSelection.Page {
             case .apps: (feature.symbol, .blue)
             case .inbox: (feature.symbol, .red)
             case .downloads: (feature.symbol, .blue)
+            case .convert: (feature.symbol, .orange)
             case .system: ("bolt", .green)
             }
         }
@@ -189,6 +190,7 @@ extension SettingsSelection.Page {
             case .usage: "How much of each AI coding plan you've used."
             case .agents: "Claude Code and Codex sessions: progress, when one needs you, and when it's done."
             case .inbox: "Your recent notifications, cleared when your Mac locks."
+            case .convert: "Drop a file on the notch to turn it into a JPEG, PNG, PDF, MP4 and more."
             case .downloads: "Downloads in progress and the last few that finished."
             case .apps: "Viorim OS and your agents: key takeaways and to-dos from each."
             case .system: "Battery health, the apps using the most energy, and your accessories' batteries."

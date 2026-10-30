@@ -6,7 +6,7 @@ public enum FeatureID: String, CaseIterable, Hashable, Sendable {
     // NotchDeck: Home, the dashboard, comes first; System (battery and energy) comes last.
     case home
     case media, sound, shelf, clipboard, calendar, tasks, notes, shortcuts, timer, network, mirror, usage, agents
-    case apps, inbox, downloads, system
+    case apps, inbox, downloads, convert, system
 
     /// SF Symbol for the tab's page in Settings, beside System Settings' own symbols. The notch draws
     /// Tabler icons instead (NotchSurface's `FeatureID.icon`). Every name here exists on macOS 14.6,
@@ -30,6 +30,7 @@ public enum FeatureID: String, CaseIterable, Hashable, Sendable {
         case .apps: "square.grid.2x2"
         case .inbox: "bell.badge"
         case .downloads: "arrow.down.circle"
+        case .convert: "arrow.triangle.2.circlepath"
         case .system: "battery.100percent.bolt"
         }
     }
@@ -59,6 +60,7 @@ public enum FeatureID: String, CaseIterable, Hashable, Sendable {
         case .apps: "Apps"
         case .inbox: "Inbox"
         case .downloads: "Downloads"
+        case .convert: "Convert"
         case .system: "System"
         }
     }

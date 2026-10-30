@@ -12,8 +12,13 @@ public struct AgendaEvent: Identifiable, Hashable, Sendable {
     public var end: Date
     public var isAllDay: Bool
     public var color: RGB?
+    /// The video call to join, when the invite has one.
+    public var link: MeetingLink?
 
-    public init(id: String, title: String, start: Date, end: Date, isAllDay: Bool, color: RGB? = nil) {
+    public init(
+        id: String, title: String, start: Date, end: Date, isAllDay: Bool, color: RGB? = nil, link: MeetingLink? = nil
+    ) {
+        self.link = link
         self.id = id
         self.title = title
         self.start = start
@@ -114,7 +119,8 @@ public final class Agenda {
     private static func event(_ event: EKEvent) -> AgendaEvent {
         AgendaEvent(
             id: event.eventIdentifier ?? UUID().uuidString, title: event.title ?? "Untitled", start: event.startDate,
-            end: event.endDate, isAllDay: event.isAllDay, color: rgb(event.calendar?.cgColor))
+            end: event.endDate, isAllDay: event.isAllDay, color: rgb(event.calendar?.cgColor),
+            link: MeetingLink.find(in: [event.url?.absoluteString, event.location, event.notes]))
     }
 
     private static func rgb(_ color: CGColor?) -> RGB? {

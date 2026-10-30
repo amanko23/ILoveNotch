@@ -35,6 +35,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         private let apps: AppsFeature
         private let inbox = InboxFeature()
         private let downloads = DownloadsFeature()
+        private let convert = ConvertFeature()
         private let pill = ClosedPillComposer()
         /// Quick Share with Android phones, part of the shelf.
         private let transfer = TransferFeature()
@@ -99,7 +100,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         #else
             [
                 home, media, shelf, clipboard, calendar, tasks, notes, shortcuts, timer, network, mirror, usage, agents,
-                apps, inbox, downloads, system,
+                apps, inbox, downloads, convert, system,
             ]
         #endif
     }
@@ -135,6 +136,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 return AnyView(EmptyView())
             #else
                 return AnyView(downloads.view)
+            #endif
+        case .convert:
+            #if APP_STORE
+                return AnyView(EmptyView())
+            #else
+                return AnyView(convert.view)
             #endif
         case .media: return AnyView(media.view)
         case .sound:
@@ -198,7 +205,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         case .shortcuts: return section(shortcuts.settingsView)
         case .notes: return section(notes.settingsView)
         case .network: return section(network.settingsView)
-        case .timer, .mirror, .system, .apps, .inbox, .downloads: return nil
+        case .timer, .mirror, .system, .apps, .inbox, .downloads, .convert: return nil
         case .home:
             #if APP_STORE
                 return nil
@@ -233,7 +240,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         #endif
         let content = NotchContent(
             tab: { [unowned self] in self.tabView(for: $0) },
-            dropFiles: { [preferences, shelf] urls in preferences.tabs.contains(.shelf) && shelf.add(urls) },
+            dropFiles: { [weak self, preferences, shelf] urls in
+                // NotchDeck: a dropped file opens Convert, to reformat it.
+                if let self, preferences.tabs.contains(.convert), self.convert.accept(urls) {
+                    Task { @MainActor in self.coordinator?.open(.convert) }
+                    return true
+                }
+                return preferences.tabs.contains(.shelf) && shelf.add(urls)
+            },
             openSettings: { [weak self] in self?.settings.show() })
         let coordinator = PanelCoordinator(preferences: preferences, content: content)
         coordinator.onPresentationsChange = { [weak self] presentations in
@@ -261,12 +275,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         clipboard.onActivity = { [weak coordinator] in coordinator?.broadcast(.activity($0)) }
         clipboard.onPicked = { [weak coordinator] in coordinator?.dismissAll() }
-        media.onActivity = { [weak coordinator] in coordinator?.broadcast(.activity($0)) }
         #if APP_STORE
+            media.onActivity = { [weak coordinator] in coordinator?.broadcast(.activity($0)) }
             media.onOngoing = { [weak coordinator] in coordinator?.setOngoing($0, for: .media) }
         #else
             // What's playing goes through NotchDeck's pill, which adds Pomodoro and Claude's progress.
             media.onOngoing = { [pill] in pill.media = $0 }
+            media.onActivity = { [weak self, weak coordinator] activity in
+                // No track announcements while a video plays, when the notch keeps quiet for it.
+                if let self, self.quietForVideo { return }
+                coordinator?.broadcast(.activity(activity))
+            }
         #endif
         shelf.onActivity = { [weak coordinator] in coordinator?.broadcast(.activity($0)) }
         calendar.onActivity = { [weak coordinator] in coordinator?.broadcast(.activity($0)) }
@@ -300,6 +319,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             home.openTab = { [weak coordinator] in coordinator?.open($0) }
             home.openSettings = { [weak self] in self?.settings.show(.feature(.home)) }
             pill.onChange = { [weak self] in self?.showPill($0) }
+            home.media = media
+            // Watching a video: the closed notch shows nothing (no "YouTube", no "Netflix") until hovered.
+            observeContinuously { [weak self] in
+                guard let self else { return }
+                let quiet = quietForVideo
+                if quiet != wasQuietForVideo {
+                    wasQuietForVideo = quiet
+                    showPill(lastPill)
+                }
+            }
             shelf.sendToAndroid = { [transfer] in transfer.send($0) }
             shelf.androidControl = AnyView(transfer.receiveControl)
             transfer.onActivity = { [weak coordinator] in coordinator?.broadcast(.activity($0)) }
@@ -353,11 +382,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     #if !APP_STORE
+        /// The pill last composed, kept to show again once a video stops.
+        private var lastPill: Activity?
+        private var wasQuietForVideo = false
+
+        /// Whether a video is playing and the notch is set to keep quiet for it.
+        private var quietForVideo: Bool { home.hidesWhileWatchingVideo && media.isWatchingVideo }
+
         /// NotchDeck's pill in the closed notch. Hovering it opens Home when the notch always opens
         /// there; what's playing on its own opens Media otherwise. It rests in Home's place, or in
         /// Media's when Home is off, so music still shows.
         private func showPill(_ activity: Activity?) {
-            var activity = activity
+            lastPill = activity
+            var activity = quietForVideo ? nil : activity
             let homeOn = preferences.isEnabled(.home)
             if homeOn, home.opensOnHome { activity?.feature = .home }
             let slot: FeatureID = homeOn && activity?.feature != .media ? .home : .media

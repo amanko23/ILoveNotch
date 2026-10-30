@@ -46,8 +46,9 @@ struct HomeView: View {
         Group {
             switch kind {
             case .claude: ClaudeTile(home: home)
+            case .music: MusicTile(home: home)
             case .focus: FocusTile(home: home)
-            case .calendar: TodayTile(home: home)
+            case .calendar: MeetingTile(home: home)
             case .takeaways: TakeawaysTile(home: home)
             }
         }
@@ -94,6 +95,12 @@ private struct ClaudeTile: View {
                 if let progress = session.progress, session.state != .done {
                     AgentProgressBar(progress: progress, tint: waiting ? Viorim.warning : Viorim.accent)
                 }
+                if session.todosTotal > 0 {
+                    StepLine(done: true, text: "\(session.todosDone) of \(session.todosTotal) steps done")
+                }
+                if let step = session.step, session.state == .working {
+                    StepLine(done: false, text: step)
+                }
                 TimelineView(.everyMinute) { context in
                     Detail(Deck.detail(session, now: context.date))
                 }
@@ -131,24 +138,77 @@ private struct FocusTile: View {
     }
 }
 
-/// Today: the date and what's next on the calendar.
-private struct TodayTile: View {
+/// What's playing: the cover, title and artist, the current line of the lyrics, and the controls.
+private struct MusicTile: View {
+    let home: HomeFeature
+
+    var body: some View {
+        Tile(title: "Music", symbol: "music.note", tint: Viorim.accent, home: home, opens: .music) {
+            if let media = home.media, let playing = media.nowPlaying {
+                HStack(spacing: 8) {
+                    if let artwork = media.artwork {
+                        Image(nsImage: artwork).resizable().scaledToFill()
+                            .frame(width: 34, height: 34)
+                            .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
+                    }
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(playing.title).font(Viorim.body).foregroundStyle(Viorim.ink).lineLimit(1)
+                        Detail(playing.artist ?? "")
+                    }
+                    Spacer(minLength: 0)
+                }
+                .task(id: playing.title) { media.loadLyricsIfNeeded() }
+                Spacer(minLength: 0)
+                HStack(spacing: 10) {
+                    TimelineView(.periodic(from: .now, by: 0.5)) { context in
+                        Text(media.lyric(at: context.date).current ?? " ")
+                            .font(Viorim.footnote)
+                            .foregroundStyle(Viorim.accent)
+                            .lineLimit(1)
+                    }
+                    Spacer(minLength: 0)
+                    controlButton("backward.fill") { media.send(.previousTrack) }
+                    controlButton(playing.isPlaying ? "pause.fill" : "play.fill") { media.send(.togglePlayPause) }
+                    controlButton("forward.fill") { media.send(.nextTrack) }
+                }
+            } else {
+                Detail("Nothing playing.")
+            }
+        }
+    }
+
+    private func controlButton(_ symbol: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: symbol).font(.system(size: 11, weight: .semibold)).foregroundStyle(Viorim.ink)
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+/// The next meeting: its title, when it starts, and Join when the invite has a video call.
+private struct MeetingTile: View {
     let home: HomeFeature
 
     var body: some View {
         let agenda = home.agenda
-        let today = IST.day(.now)
-        Tile(title: "Today · \(today)", symbol: "calendar", tint: Deck.calendar, home: home, opens: .calendar) {
+        Tile(title: "Next meeting", symbol: "video", tint: Deck.calendar, home: home, opens: .calendar) {
             switch agenda.access {
             case .granted:
-                let next = agenda.upcoming.prefix(2)
-                if next.isEmpty {
-                    Detail("Nothing else this week.")
+                if let next = agenda.upcoming.first(where: { !$0.isAllDay }) ?? agenda.upcoming.first {
+                    Text(next.title).font(Viorim.body).foregroundStyle(Viorim.ink).lineLimit(1)
+                    TimelineView(.everyMinute) { context in
+                        Detail(Deck.startsIn(next, now: context.date))
+                    }
+                    Spacer(minLength: 0)
+                    if let link = next.link {
+                        PillButton("Join", prominent: true) { NSWorkspace.shared.open(link.url) }
+                            .help("Join on \(link.service)")
+                    }
                 } else {
-                    ForEach(Array(next)) { event in EventRow(event: event) }
+                    Detail("Nothing else this week.")
                 }
             case .notDetermined:
-                Detail("See what's next on your calendar.")
+                Detail("See your next meeting.")
                 PillButton("Continue", prominent: true) { agenda.requestAccess() }
             case .denied:
                 Detail("Calendar access is off.")
@@ -180,6 +240,21 @@ private struct TakeawaysTile: View {
                     Takeaway(symbol: "sparkle", text: line)
                 }
             }
+        }
+    }
+}
+
+/// A line of Claude's work: done steps ticked and dimmed, the current one with a chevron.
+private struct StepLine: View {
+    let done: Bool
+    let text: String
+
+    var body: some View {
+        HStack(spacing: 5) {
+            Image(systemName: done ? "checkmark" : "chevron.right")
+                .font(.system(size: 8, weight: .semibold))
+                .foregroundStyle(done ? Viorim.ink3 : Viorim.accent)
+            Text(text).font(Viorim.footnote).foregroundStyle(done ? Viorim.ink2 : Viorim.ink).lineLimit(1)
         }
     }
 }
@@ -302,6 +377,16 @@ enum Deck {
             if let since = session.workingSince, let elapsed = elapsed(since: since, now: now) { parts.append(elapsed) }
             return parts.isEmpty ? "Working on it" : parts.joined(separator: " · ")
         }
+    }
+
+    /// "In 12 min · 15:30", "Now · until 16:00", or "Tue 27 · 10:00".
+    static func startsIn(_ event: AgendaEvent, now: Date) -> String {
+        if event.isAllDay { return "All day" }
+        if event.start <= now { return "Now · until \(IST.time(event.end))" }
+        let minutes = Int(event.start.timeIntervalSince(now) / 60)
+        if minutes < 60 { return "In \(max(minutes, 1)) min · \(IST.time(event.start))" }
+        if IST.calendar.isDate(event.start, inSameDayAs: now) { return "Today · \(IST.time(event.start))" }
+        return "\(IST.day(event.start)) · \(IST.time(event.start))"
     }
 
     /// "4m", "1h 5m", or nil under a minute.

@@ -61,6 +61,7 @@ extension FeatureID {
         case .apps: "layout-grid"
         case .inbox: "inbox"
         case .downloads: "download"
+        case .convert: "refresh"
         case .system: "cpu"
         }
     }

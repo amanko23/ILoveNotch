@@ -326,7 +326,7 @@ struct AppsSummaryTests {
 struct HomeTileOrderTests {
     @Test func aStoredOrderKeepsKnownTilesAndAddsMissingOnes() {
         let order = HomeFeature.order(["takeaways", "bogus", "claude", "claude"])
-        #expect(order == [.takeaways, .claude, .focus, .calendar])
+        #expect(order == [.takeaways, .music, .calendar, .focus, .claude])
         #expect(HomeFeature.order(nil) == HomeFeature.TileKind.allCases)
     }
 }

@@ -43,6 +43,7 @@ struct PeekView: View {
         case .claude:
             let count = home.agents.sessions.count
             return count == 1 ? "Claude Code · 1 session" : "Claude Code · \(count) sessions"
+        case .music: return home.media?.nowPlaying?.title ?? "Music"
         case .focus: return "Focus"
         case .calendar: return IST.month(.now)
         case .system: return "Battery & energy"
@@ -59,6 +60,7 @@ struct PeekView: View {
         case .calendar: .calendar
         case .system: .system
         case .viorim: .apps
+        case .music: .media
         case .focus, .weather, .user: nil
         }
     }
@@ -72,6 +74,7 @@ struct PeekView: View {
         case .weather: WeatherPeek(weather: home.weather, openSettings: { home.openSettings?() })
         case .user: UserPeek()
         case .viorim: AppsPeek(apps: home.apps)
+        case .music: LyricsPeek(media: home.media)
         }
     }
 }
@@ -445,6 +448,32 @@ private struct AppsPeek: View {
             }
         }
         .scrollIndicators(.never)
+    }
+}
+
+/// The lyrics around the current line, synced to what's playing.
+private struct LyricsPeek: View {
+    let media: MediaFeature?
+
+    var body: some View {
+        if let media, media.nowPlaying != nil {
+            TimelineView(.periodic(from: .now, by: 0.5)) { context in
+                let lyric = media.lyric(at: context.date)
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(lyric.current ?? "No lyrics for this song.")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(lyric.current == nil ? Viorim.ink2 : Viorim.accent)
+                        .fixedSize(horizontal: false, vertical: true)
+                    if let next = lyric.next {
+                        Text(next).font(Viorim.body).foregroundStyle(Viorim.ink2)
+                    }
+                    Spacer(minLength: 0)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        } else {
+            Detail("Nothing playing.")
+        }
     }
 }
 

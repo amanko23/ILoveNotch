@@ -152,6 +152,23 @@ struct MediaView: View {
                     .id(subtitle)
                     .transition(.push(from: .bottom))
             }
+            if media.showsLyrics, media.syncedLyrics?.lines.isEmpty == false {
+                TimelineView(.periodic(from: .now, by: 0.5)) { context in
+                    let line = media.lyric(at: context.date)
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(line.current ?? "♪")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundStyle(Color(red: 0.62, green: 0.70, blue: 0.80))
+                            .id(line.current)
+                            .transition(.push(from: .bottom))
+                        if let next = line.next {
+                            Text(next).font(.system(size: 11)).foregroundStyle(.white.opacity(0.45))
+                        }
+                    }
+                    .lineLimit(1)
+                    .animation(reduceMotion ? nil : .easeOut(duration: 0.25), value: line.current)
+                }
+            }
             accessories(now, inline: inline)
                 .padding(.top, 2)
         }
