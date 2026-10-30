@@ -306,6 +306,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             usage.openSettings = { [weak self] in self?.settings.show(.feature(.usage)) }
             agents.onActivity = { [weak coordinator] in coordinator?.broadcast(.activity($0)) }
             agents.onOngoing = { [weak coordinator] in coordinator?.setOngoing($0, for: .agents) }
+            // A permission prompt opens Home, whose Claude tile answers it.
+            agents.onPermissionRequest = { [weak self, weak coordinator] _ in
+                self?.home.peek = nil
+                coordinator?.open(.home)
+            }
             agents.onLongTaskFinished = { [weak coordinator] session in
                 coordinator?.broadcast(.activity(AgentsFeature.finishedActivity(session)))
             }

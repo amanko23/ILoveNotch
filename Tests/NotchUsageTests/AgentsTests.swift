@@ -76,7 +76,11 @@ struct AgentHooksTests {
         #expect(
             Set(events.keys) == [
                 "UserPromptSubmit", "Notification", "PostToolUse", "Stop", "SessionEnd", "SessionStart", "PreCompact",
+                "PermissionRequest",
             ])
+        let ask = try #require((events["PermissionRequest"]?.first?["hooks"] as? [[String: Any]])?.first)
+        #expect(ask["async"] == nil && ask["timeout"] as? Int == 75, "the one hook that waits, for a minute at most")
+        #expect((ask["command"] as? String)?.hasSuffix("notchdeck-agent-hook' claude ask") == true)
         #expect(events["Stop"]?.count == 2, "theirs first, then ours")
         let todos = events["PostToolUse"]?.first { $0["matcher"] as? String == AgentTool.todoTools }
         #expect(todos != nil && events["PostToolUse"]?.count == 2, "every tool call, and the to-do tools")
@@ -204,6 +208,15 @@ struct AgentHookScriptTests {
         #expect(session.todosDone == 1 && session.todosTotal == 2 && session.step == "Writing docs")
     }
 
+    @Test func withNotchDeckClosedAPermissionPromptGoesStraightToTheTerminal() throws {
+        let sandbox = try Sandbox()
+        try sandbox.hooks.install(.claude)
+        let input = #"{"session_id":"abc","cwd":"/tmp/nook","tool_name":"Bash","tool_input":{"command":"ls"}}"#
+        try sandbox.runHook("claude", "ask", input: input)
+        let left = (try? FileManager.default.contentsOfDirectory(atPath: sandbox.hooks.requests.path)) ?? []
+        #expect(left.isEmpty, "no request is left behind when nothing can answer it")
+    }
+
     @Test func withoutTheSessionFolderTheHookDoesNothing() throws {
         let sandbox = try Sandbox()
         try sandbox.hooks.install(.claude)
@@ -217,6 +230,37 @@ struct AgentHookScriptTests {
 @MainActor
 struct AgentsFeatureTests {
     private let defaults = UserDefaults(suiteName: "Agents.\(UUID().uuidString)")!
+
+    @Test func aPermissionPromptWaitsInTheNotchUntilItsAnswered() throws {
+        let sandbox = try Sandbox()
+        try sandbox.hooks.install(.claude)
+        let agents = AgentsFeature(hooks: sandbox.hooks, defaults: defaults)
+        var ongoing: [Activity?] = []
+        var arrived: [PermissionRequest] = []
+        agents.onOngoing = { ongoing.append($0) }
+        agents.onPermissionRequest = { arrived.append($0) }
+        agents.phase = .background
+
+        let request = sandbox.hooks.requests.appending(path: "s1-100.req")
+        try Data("s1\n/Users/me/Code/nook\nBash\nnpm test\n".utf8).write(to: request)
+        agents.reloadRequests(announcing: true)
+        let first = try #require(agents.permissionRequests.first)
+        #expect(first.project == "nook" && first.summary == "npm test" && first.verb == "Claude wants to run")
+        #expect(arrived.map(\.id) == ["s1-100"] && ongoing.last??.title == "nook")
+
+        agents.answer(first, .allow)
+        let answer = try String(contentsOf: sandbox.hooks.requests.appending(path: "s1-100.ans"), encoding: .utf8)
+        #expect(answer == "allow\n" && agents.permissionRequests.isEmpty)
+        agents.reloadRequests(announcing: true)
+        #expect(agents.permissionRequests.isEmpty, "an answered prompt doesn't come back")
+        #expect(ongoing.last == .some(nil))
+
+        agents.answersFromNotch = false
+        #expect(FileManager.default.fileExists(atPath: sandbox.hooks.answerOff.path))
+        agents.answersFromNotch = true
+        #expect(!FileManager.default.fileExists(atPath: sandbox.hooks.answerOff.path))
+        agents.phase = .stopped
+    }
 
     @Test func aWaitingAgentRestsInTheNotchAndOneThatFinishesIsAnnounced() throws {
         let sandbox = try Sandbox()

@@ -136,10 +136,24 @@ public final class AgentsFeature: NotchFeature {
     @ObservationIgnored public var onActivity: ((Activity) -> Void)?
     /// Agents waiting for approval, for the closed notch; nil when none is.
     @ObservationIgnored public var onOngoing: ((Activity?) -> Void)?
+    /// NotchDeck: permission prompts waiting for an answer from the notch, oldest first.
+    public private(set) var permissionRequests: [PermissionRequest] = []
+    /// NotchDeck: raised when a new permission prompt arrives, for the notch to open on it.
+    @ObservationIgnored public var onPermissionRequest: ((PermissionRequest) -> Void)?
+    /// NotchDeck, per-feature setting: Claude's permission prompts can be answered from the notch.
+    /// Off, the hook script finds a flag file and leaves every prompt to the terminal.
+    public var answersFromNotch: Bool {
+        didSet {
+            defaults.set(answersFromNotch, forKey: Self.answerKey)
+            writeAnswerFlag()
+        }
+    }
 
     let hooks: AgentHooks
     private static let announceKey = "agents.announcesDone"
     private static let chimeKey = "agents.chimesOnLongTasks"
+    private static let answerKey = "agents.answersFromNotch"
+    @ObservationIgnored private var requestWatcher: DispatchSourceFileSystemObject?
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private var watcher: DispatchSourceFileSystemObject?
     @ObservationIgnored private var shownWaiting: Activity?
@@ -153,6 +167,7 @@ public final class AgentsFeature: NotchFeature {
         self.defaults = defaults
         announcesDone = defaults.object(forKey: Self.announceKey) as? Bool ?? true
         chimesOnLongTasks = defaults.object(forKey: Self.chimeKey) as? Bool ?? true
+        answersFromNotch = defaults.object(forKey: Self.answerKey) as? Bool ?? true
     }
 
     public var view: some View { AgentsView(agents: self) }
@@ -215,12 +230,88 @@ public final class AgentsFeature: NotchFeature {
         guard phase != .stopped, !connected.isEmpty else {
             watcher?.cancel()
             watcher = nil
+            requestWatcher?.cancel()
+            requestWatcher = nil
             sessions = []
+            permissionRequests = []
             showWaiting(nil)
             return
         }
         if watcher == nil { watch() }
+        if requestWatcher == nil { watchRequests() }
+        writeAnswerFlag()
         reload(announcing: false)
+        reloadRequests(announcing: false)
+    }
+
+    // MARK: Permission prompts
+
+    /// Answers a permission prompt. The hook script, polling for it, hands the answer to Claude
+    /// Code; "In terminal" lets the terminal ask instead.
+    public func answer(_ request: PermissionRequest, _ answer: PermissionAnswer) {
+        let file = hooks.requests.appending(path: "\(request.id).ans")
+        try? Data((answer.rawValue + "\n").utf8).write(to: file, options: .atomic)
+        permissionRequests.removeAll { $0.id == request.id }
+        showWaiting(currentWaiting)
+    }
+
+    /// The hook script looks for this file before leaving a prompt for the notch.
+    private func writeAnswerFlag() {
+        let flag = hooks.answerOff
+        if answersFromNotch {
+            try? FileManager.default.removeItem(at: flag)
+        } else if FileManager.default.fileExists(atPath: flag.deletingLastPathComponent().path) {
+            try? Data().write(to: flag)
+        }
+    }
+
+    private func watchRequests() {
+        try? FileManager.default.createDirectory(at: hooks.requests, withIntermediateDirectories: true)
+        let folder = Darwin.open(hooks.requests.path, O_EVTONLY)
+        guard folder >= 0 else { return }
+        let source = DispatchSource.makeFileSystemObjectSource(fileDescriptor: folder, eventMask: .write, queue: .main)
+        source.setEventHandler { [weak self] in
+            MainActor.assumeIsolated { self?.reloadRequests(announcing: true) }
+        }
+        source.setCancelHandler { close(folder) }
+        source.resume()
+        requestWatcher = source
+    }
+
+    /// Reads the waiting prompts again. One older than the script's minute was given up on.
+    func reloadRequests(announcing: Bool, now: Date = .now) {
+        let files =
+            (try? FileManager.default.contentsOfDirectory(
+                at: hooks.requests, includingPropertiesForKeys: [.contentModificationDateKey])) ?? []
+        var found: [PermissionRequest] = []
+        for file in files where file.pathExtension == "req" {
+            guard let contents = try? String(contentsOf: file, encoding: .utf8),
+                let modified = try? file.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate,
+                now.timeIntervalSince(modified) < 70,
+                !FileManager.default.fileExists(atPath: file.deletingPathExtension().path + ".ans"),
+                let request = PermissionRequest(
+                    id: file.deletingPathExtension().lastPathComponent, contents: contents, date: modified)
+            else { continue }
+            found.append(request)
+        }
+        found.sort { $0.date < $1.date }
+        let known = Set(permissionRequests.map(\.id))
+        permissionRequests = found
+        if announcing {
+            for request in found where !known.contains(request.id) { onPermissionRequest?(request) }
+        }
+        showWaiting(currentWaiting)
+    }
+
+    /// The closed notch's reminder: a prompt the notch can answer, else agents waiting in a terminal.
+    private var currentWaiting: Activity? {
+        Self.asking(permissionRequests) ?? Self.waiting(in: sessions)
+    }
+
+    static func asking(_ requests: [PermissionRequest]) -> Activity? {
+        guard let first = requests.first else { return nil }
+        let title = requests.count == 1 ? first.project : "\(requests.count) waiting"
+        return Activity(feature: .agents, symbol: "hand.raised.fill", title: title, duration: .zero)
     }
 
     /// A new, renamed, or removed session file changes the folder; the hook script renames each
@@ -281,7 +372,7 @@ public final class AgentsFeature: NotchFeature {
                         duration: .seconds(3)))
             }
         }
-        showWaiting(Self.waiting(in: found))
+        showWaiting(Self.asking(permissionRequests) ?? Self.waiting(in: found))
     }
 
     /// Whether a turn of 2 minutes or more just ended: busy before, done or idle now, and just

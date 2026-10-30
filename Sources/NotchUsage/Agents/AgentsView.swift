@@ -10,6 +10,20 @@ struct AgentsView: View {
     var body: some View {
         if agents.connected.isEmpty {
             setup
+        } else if let request = agents.permissionRequests.first {
+            // NotchDeck: a prompt to answer comes before everything else.
+            ScrollView {
+                VStack(spacing: 6) {
+                    PermissionCard(request: request, agents: agents)
+                    if agents.permissionRequests.count > 1 {
+                        Text("\(agents.permissionRequests.count - 1) more waiting")
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                    ForEach(agents.sessions) { row($0) }
+                }
+                .padding(.vertical, 6)
+            }
+            .fadingEdges()
         } else if agents.sessions.isEmpty {
             FeatureUnavailableView(
                 symbol: "terminal", title: "No agents at work",
@@ -174,6 +188,13 @@ private struct AgentsSettings: View {
             }
             Toggle("Show when an agent finishes in the background", isOn: $agents.announcesDone)
             Toggle("Chime when a long task finishes", isOn: $agents.chimesOnLongTasks)
+            Toggle(isOn: $agents.answersFromNotch) {
+                Text("Answer permission prompts from the notch")
+                Text(
+                    "When Claude Code asks to run a command or change a file, the notch shows Allow and Deny. "
+                        + "Unanswered for a minute, or with NotchDeck closed, the terminal asks as usual.")
+            }
+            .disabled(!agents.connected.contains(.claude))
             if let failure = agents.failure {
                 Text(failure).font(.caption).foregroundStyle(.red)
             }

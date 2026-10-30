@@ -84,6 +84,23 @@ private struct ClaudeTile: View {
                 if agents.available.contains(.claude) {
                     PillButton("Connect", prominent: true) { agents.connect(.claude) }
                 }
+            } else if let request = agents.permissionRequests.first {
+                // Answered right here: Claude waits for it.
+                HStack(spacing: 6) {
+                    StatusChip("Needs you", tone: .warning)
+                    Text(request.project).font(Viorim.body).foregroundStyle(Viorim.ink).lineLimit(1)
+                }
+                Text(request.summary)
+                    .font(.system(size: 10.5, design: .monospaced))
+                    .foregroundStyle(Viorim.ink)
+                    .lineLimit(1)
+                Spacer(minLength: 0)
+                HStack(spacing: 6) {
+                    PillButton("Deny") { agents.answer(request, .deny) }
+                    PillButton("Terminal") { agents.answer(request, .terminal) }
+                    Spacer(minLength: 0)
+                    PillButton("Allow", prominent: true) { agents.answer(request, .allow) }
+                }
             } else if let session = HomeFeature.featured(agents.sessions) {
                 let waiting = session.state == .waiting
                 HStack(spacing: 6) {

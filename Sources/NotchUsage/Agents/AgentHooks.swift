@@ -53,13 +53,17 @@ public enum AgentTool: String, CaseIterable, Identifiable, Sendable {
         guard self == .claude else { return common }
         return common + [
             ("SessionStart", nil, "idle"), ("PreCompact", nil, "compacting"),
-            ("PostToolUse", Self.todoTools, "todos"),
+            ("PostToolUse", Self.todoTools, "todos"), ("PermissionRequest", nil, Self.askState),
         ]
     }
 
     /// Claude Code's to-do tools: the older TodoWrite, which sends the whole list each time, and the
     /// newer task tools, which add and update one task at a time.
     static let todoTools = "TodoWrite|TaskCreate|TaskUpdate"
+
+    /// NotchDeck: the one hook that waits, for an answer to a permission prompt from the notch. It
+    /// gives up after a minute, and the prompt shows in the terminal as usual.
+    static let askState = "ask"
 }
 
 /// What went wrong changing a tool's settings. Nothing is written when any of these happen.
@@ -85,6 +89,11 @@ public struct AgentHooks: Sendable {
     let states: URL
     /// A copy of each settings file from just before NotchDeck last changed it.
     let backups: URL
+    /// Where the script leaves permission prompts for the notch to answer, one `.req` file each,
+    /// and finds the answers, a `.ans` file beside each.
+    let requests: URL
+    /// Present when the user answers permission prompts in the terminal only.
+    let answerOff: URL
 
     static let scriptName = "notchdeck-agent-hook"
 
@@ -99,6 +108,8 @@ public struct AgentHooks: Sendable {
         script = support.appending(path: Self.scriptName)
         states = support.appending(path: "Agents", directoryHint: .isDirectory)
         backups = support.appending(path: "Backups", directoryHint: .isDirectory)
+        requests = support.appending(path: "Requests", directoryHint: .isDirectory)
+        answerOff = support.appending(path: "answer-off")
     }
 
     func configFile(_ tool: AgentTool) -> URL { home.appending(path: tool.configPath) }
@@ -128,6 +139,7 @@ public struct AgentHooks: Sendable {
 
     public func install(_ tool: AgentTool) throws {
         try FileManager.default.createDirectory(at: states, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: requests, withIntermediateDirectories: true)
         try writeScript()
         try edit(tool) { Self.adding(tool, command: command, to: $0) }
     }
@@ -137,6 +149,7 @@ public struct AgentHooks: Sendable {
         try edit(tool) { Self.removing(from: $0) }
         guard !AgentTool.allCases.contains(where: isInstalled) else { return }
         try? FileManager.default.removeItem(at: states)
+        try? FileManager.default.removeItem(at: requests)
         try? FileManager.default.removeItem(at: script)
     }
 
@@ -215,15 +228,16 @@ public struct AgentHooks: Sendable {
         }
     }
 
-    /// `settings` with the notch's hooks for `tool` after everyone else's, one group per event. It
-    /// runs in the background (`async`), so an agent never waits on it.
+    /// `settings` with the notch's hooks for `tool` after everyone else's, one group per event. They
+    /// run in the background (`async`), so an agent never waits on them; the one exception is the
+    /// permission prompt's, which waits up to a minute for an answer from the notch.
     static func adding(_ tool: AgentTool, command: String, to settings: [String: Any]) -> [String: Any] {
         var settings = removing(from: settings)
         var events = settings["hooks"] as? [String: Any] ?? [:]
         for (event, matcher, state) in tool.events {
-            var group: [String: Any] = [
-                "hooks": [["type": "command", "command": "\(command) \(tool.rawValue) \(state)", "async": true]]
-            ]
+            var handler: [String: Any] = ["type": "command", "command": "\(command) \(tool.rawValue) \(state)"]
+            if state == AgentTool.askState { handler["timeout"] = 75 } else { handler["async"] = true }
+            var group: [String: Any] = ["hooks": [handler]]
             if let matcher { group["matcher"] = matcher }
             events[event] = (events[event] as? [Any] ?? []) + [group]
         }
@@ -273,11 +287,53 @@ public struct AgentHooks: Sendable {
         # NotchDeck agent status, run by Claude Code's and Codex's hooks. NotchDeck adds the hooks
         # when you connect a tool in Settings > Agents and removes them when you disconnect.
         # Usage: notchdeck-agent-hook <claude|codex> <event> < hook.json
-        # Events: idle working waiting resumed compacting todos done ended
+        # Events: idle working waiting resumed compacting todos done ended ask
         tool=$1
         event=$2
         dir="$(dirname "$0")/Agents"
         if [ ! -d "$dir" ]; then cat >/dev/null; exit 0; fi
+        field() { printf '%s' "$input" | /usr/bin/plutil -extract "$1" raw -o - - 2>/dev/null | tr '\n\r' '  '; }
+        value() { field "$1" | sed 's/ *$//'; }
+        # A permission prompt: left for the notch to answer, waiting up to a minute. With NotchDeck
+        # closed, answering turned off, or no answer, it prints nothing and the terminal asks.
+        if [ "$event" = ask ]; then
+            input=$(cat)
+            requests="$(dirname "$0")/Requests"
+            [ -e "$(dirname "$0")/answer-off" ] && exit 0
+            pgrep -xq NotchDeck || exit 0
+            session=$(field session_id | tr -cd 'A-Za-z0-9._-')
+            [ -n "$session" ] || exit 0
+            mkdir -p "$requests" || exit 0
+            request="$requests/$session-$(date +%s)"
+            trap 'rm -f "$request.req" "$request.ans" "$request.tmp"' EXIT
+            trap 'exit 0' INT TERM HUP
+            asked=$(value tool_name)
+            case $asked in
+            Bash) summary=$(value tool_input.command) ;;
+            Edit | MultiEdit | Write | Read | NotebookEdit) summary=$(value tool_input.file_path) ;;
+            *) summary=$asked ;;
+            esac
+            summary=$(printf '%s' "$summary" | cut -c1-300)
+            printf '%s\n' "$session" "$(value cwd)" "$asked" "$summary" >"$request.tmp" || exit 0
+            mv -f "$request.tmp" "$request.req"
+            answer=
+            i=0
+            while [ "$i" -lt 120 ]; do
+                if [ -f "$request.ans" ]; then
+                    answer=$(head -n 1 "$request.ans")
+                    break
+                fi
+                sleep 0.5
+                i=$((i + 1))
+            done
+            case $answer in
+            allow) printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"PermissionRequest","decision":{"behavior":"allow"}}}' ;;
+            deny)
+                printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"PermissionRequest","decision":{"behavior":"deny","message":"Denied from NotchDeck"}}}'
+                ;;
+            esac
+            exit 0
+        fi
         # After every tool call: only worth reading while one of this tool's sessions is waiting,
         # compacting, or idle, any of which a tool call means is working again.
         if [ "$event" = resumed ] && ! grep -qsxE 'waiting|compacting|idle' "$dir/$tool"-*; then
@@ -285,8 +341,6 @@ public struct AgentHooks: Sendable {
             exit 0
         fi
         input=$(cat)
-        field() { printf '%s' "$input" | /usr/bin/plutil -extract "$1" raw -o - - 2>/dev/null | tr '\n\r' '  '; }
-        value() { field "$1" | sed 's/ *$//'; }
         session=$(field session_id | tr -cd 'A-Za-z0-9._-')
         [ -n "$session" ] || exit 0
         file="$dir/$tool-$session"
