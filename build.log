@@ -1,0 +1,27 @@
+git submodule update --init --recursive
+xcodegen generate --quiet
+xcodebuild -project OpenNotch.xcodeproj -scheme OpenNotch -configuration Release \
+		-destination 'platform=macOS,arch=arm64' -derivedDataPath .build/xcode \
+		OPENNOTCH_COMMIT='8e03169'  ONLY_ACTIVE_ARCH=YES DEBUG_INFORMATION_FORMAT=dwarf -quiet build
+/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Antigravity/AntigravityProvider.swift:39:67: warning: no 'async' operations occur within 'await' expression
+        pricing: @escaping @Sendable () async -> ModelPricing = { await ModelPricingStore.shared.current() }
+                                                                  ^
+/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Claude/ClaudeProvider.swift:63:67: warning: no 'async' operations occur within 'await' expression
+        pricing: @escaping @Sendable () async -> ModelPricing = { await ModelPricingStore.shared.current() }
+                                                                  ^
+/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Codex/CodexProvider.swift:37:67: warning: no 'async' operations occur within 'await' expression
+        pricing: @escaping @Sendable () async -> ModelPricing = { await ModelPricingStore.shared.current() },
+                                                                  ^
+/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Copilot/CopilotUsageMapper.swift:209:13: warning: 'nonisolated(unsafe)' is unnecessary for a constant with 'Sendable' type 'DateFormatter', consider removing it
+    private nonisolated(unsafe) static let dayOnlyFormatter: DateFormatter = {
+            ^~~~~~~~~~~~~~~~~~~~
+            
+/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Cursor/CursorProvider.swift:29:67: warning: no 'async' operations occur within 'await' expression
+        pricing: @escaping @Sendable () async -> ModelPricing = { await ModelPricingStore.shared.current() }
+                                                                  ^
+/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Providers/Grok/GrokProvider.swift:30:67: warning: no 'async' operations occur within 'await' expression
+        pricing: @escaping @Sendable () async -> ModelPricing = { await ModelPricingStore.shared.current() }
+                                                                  ^
+/Users/runner/work/ILoveNotch/ILoveNotch/Sources/NotchUsage/OpenUsage/Services/SystemClients.swift:314:48: warning: 'kSecUseAuthenticationUIFail' was deprecated in macOS 11.0: Instead of kSecUseAuthenticationUI, use kSecUseAuthenticationContext and set LAContext.interactionNotAllowed property
+            kSecUseAuthenticationUI as String: kSecUseAuthenticationUIFail,
+                                               ^
