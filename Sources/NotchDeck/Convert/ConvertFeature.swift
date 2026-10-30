@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 import AppKit
+import ImageIO
 import NotchCore
 import Observation
-import ImageIO
 import SwiftUI
 import UniformTypeIdentifiers
 
@@ -14,7 +14,9 @@ import UniformTypeIdentifiers
 public final class ConvertFeature: NotchFeature {
     public struct Job: Identifiable, Sendable {
         public enum State: Equatable, Sendable {
-            case working, done([URL]), failed(String)
+            case working
+            case done([URL])
+            case failed(String)
         }
 
         public let id = UUID()
